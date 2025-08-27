@@ -1,12 +1,17 @@
 [user]
-	email = joel@joeworks.com
-	name = Joseph Lee
+	name = {{ env "GIT_NAME" | default .userFullName | default "Anonymous" }}
+	email = {{ env "GIT_EMAIL" | default .userEmail | default "nobody@example.com" }}
+  {{ if .userSigningKey }}
+    signingkey = {{ .userSigningKey }}
+  {{ else if env "GIT_SIGNING_KEY" }}
+    signingkey = {{ env "GIT_SIGNING_KEY" }}
+  {{ end }}
 
 [core]
 	eol = lf
 	autocrlf = input
 	safecrlf = false
-	excludesfile = /Users/joseph.lee/.gitignore
+	excludesfile = ~/.gitignore
 
 [color]
 	status = auto
@@ -43,8 +48,13 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+
 [credential]
-	helper = 
 	helper = /usr/local/share/gcm-core/git-credential-manager
+
 [credential "https://dev.azure.com"]
 	useHttpPath = true
+
+[include]
+  path = ~/.gitconfig.local
+

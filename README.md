@@ -24,6 +24,8 @@ My personal dotfiles managed with [chezmoi](https://www.chezmoi.io/). Includes c
 brew install chezmoi
 
 # 3) Pull & apply my dotfiles in one go
+export GIT_NAME = "Your User Name"        # for .gitconfig
+export GIT_EMAIL="Your Email Address"     # for .gitconfig
 chezmoi init --apply https://github.com/joelee/chezmoi_dotfiles.git
 
 # 4) Install Homebrew packages defined in the Brewfile
