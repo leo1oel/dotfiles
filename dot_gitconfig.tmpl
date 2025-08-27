@@ -1,6 +1,6 @@
 [user]
-	name = {{ env "GIT_NAME" | default .userFullName | default "Anonymous" }}
-	email = {{ env "GIT_EMAIL" | default .userEmail | default "nobody@example.com" }}
+  name = {{ env "GIT_NAME" | default .userFullName | default "Anonymous" }}
+  email = {{ env "GIT_EMAIL" | default .userEmail | default "nobody@example.com" }}
   {{ if .userSigningKey }}
     signingkey = {{ .userSigningKey }}
   {{ else if env "GIT_SIGNING_KEY" }}
@@ -8,52 +8,62 @@
   {{ end }}
 
 [core]
-	eol = lf
-	autocrlf = input
-	safecrlf = false
-	excludesfile = ~/.gitignore
+  eol = lf
+  autocrlf = input
+  safecrlf = false
+  excludesfile = ~/.gitignore
+  pager = delta
 
 [color]
-	status = auto
-	branch = auto
-	interactive = auto
-	diff = auto
+  status = auto
+  branch = auto
+  interactive = auto
+  diff = auto
 
 [alias]
-	lg = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(bold white)— %an%C(reset)' --abbrev-commit
-	lgm = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(bold white)— %an%C(reset)' --abbrev-commit master..
-	co = checkout
-	br = branch
-	ci = commit
-	st = status
-	last = log -1 HEAD
-	fo = fetch origin -p
-	rb = rebase
-	mg = merge
-	rbm = rebase origin/master
-	mgm = merge origin/master
+  lg = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(bold white)— %an%C(reset)' --abbrev-commit
+  lgm = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(bold white)— %an%C(reset)' --abbrev-commit master..
+  co = checkout
+  br = branch
+  ci = commit
+  st = status
+  last = log -1 HEAD
+  fo = fetch origin -p
+  rb = rebase
+  mg = merge
+  rbm = rebase origin/master
+  mgm = merge origin/master
 
 [diff]
-	guitool = kdiff3
+  tool = meld
 
 [difftool]
-	prompt = false
+  prompt = false
+
+[interactive]
+  diffFilter = delta --color-only
+
+[delta]
+  navigate = true  # use n and N to move between diff sections
+  dark = true      # or light = true, or omit for auto-detection
 
 [merge]
-	tool = kdiff3
-	conflictstyle = diff3
+  conflictStyle = zdiff3
+
+[difftool "meld"]
+  cmd = /Applications/Meld.app/Contents/MacOS/Meld $LOCAL $REMOTE
 
 [filter "lfs"]
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
 
 [credential]
-	helper = /usr/local/share/gcm-core/git-credential-manager
+  helper = /usr/local/share/gcm-core/git-credential-manager
 
 [credential "https://dev.azure.com"]
-	useHttpPath = true
+  useHttpPath = true
 
 [include]
   path = ~/.gitconfig.local
