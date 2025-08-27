@@ -24,11 +24,18 @@ My personal dotfiles managed with [chezmoi](https://www.chezmoi.io/). Includes c
 brew install chezmoi
 
 # 3) Pull & apply my dotfiles in one go
-chezmoi init --apply https://github.com/<your-github-username>/dotfiles.git
+chezmoi init --apply https://github.com/joelee/chezmoi_dotfiles.git
 
 # 4) Install Homebrew packages defined in the Brewfile
 brew bundle --file "$HOME/Brewfile"
 
 # 5) Sanity check
 chezmoi doctor
+
+# 6) Enable Fish Shell
+sudo -sh -c "echo /opt/homebrew/bin/fish >> /etc/shells"
+## Restart your Terminal
+chsh -s /opt/homebrew/bin/fish
+## Restart your terminal again
+
 ```

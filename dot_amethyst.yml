@@ -7,9 +7,6 @@
 
 layouts:
   - tall
-  - joe-tv-focus
-  - joe-tv-ide
-  - joe-tv-dual
   - two-pane
   - fullscreen
   - floating
@@ -18,6 +15,12 @@ layouts:
   - widescreen-tall
   - widescreen-tall-right
   - tall-right
+  - two-pane-right
+  - 4column-right
+  - wide
+  # - joe-tv-focus
+  # - joe-tv-ide
+  # - joe-tv-dual
 
 mod1:
   - option
@@ -53,7 +56,7 @@ select-middle-wide-layout:
   mod: mod1
   key: s
 
-select-4column-left-layout:
+select-wide-layout:
   mod: mod2
   key: s
 
@@ -61,7 +64,7 @@ select-two-pane-layout:
   mod: mod1
   key: d
 
-select-joe-tv-dual-layout:
+select-two-pane-right-layout:
   mod: mod2
   key: d
 
@@ -73,11 +76,11 @@ select-floating-layout:
   mod: mod2
   fey: f
 
-select-joe-tv-focus-layout:
+select-4column-left-layout:
   mod: mod1
   key: g
 
-select-joe-tv-ide-layout:
+select-4column-right-layout:
   mod: mod2
   key: g
 
@@ -86,13 +89,16 @@ use-canary-build: true
 mouse-follows-focus: true
 debug-layout-info: true
 restore-layouts-on-launch: false
+smart-window-margins: true
 
-window-max-count: 12
+window-max-count: 5
 window-minimum-height: 640
 window-minimum-width: 480
 
 window-margins: true
 window-margin-size: 5
+
+restore-layouts-on-launch: true
 
 
 floating:
@@ -114,4 +120,7 @@ floating:
   - org.grunenberg.PhotoStickies
   - io.zsa.Keymapp
   - jp.plentycom.app.SteerMouse
+  - com.coteditor.CotEditor
+  - com.amazonaws.acvc.osx
+  - us.zoom.xos
 
