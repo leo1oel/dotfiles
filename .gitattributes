@@ -1,0 +1,11 @@
+* text=auto eol=lf
+
+# Treat lockfiles and binaries as binary
+*.lock binary
+*.png  binary
+*.jpg  binary
+*.gif  binary
+
+# Common linguist tweaks
+*.fish linguist-language=Fish
+

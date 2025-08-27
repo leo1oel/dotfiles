@@ -1,0 +1,13 @@
+# Personal secrets
+.config/fish/fish_variables
+
+# Machine-specific files
+.gitconfig.local
+
+# OS metadata
+.DS_Store
+
+# DirEnv files
+.envrc
+.env
+

@@ -1,0 +1,10 @@
+.DS_Store
+.AppleDouble
+.LSOverride
+
+.idea
+
+# direnv files
+.env
+.envrc
+

@@ -1,0 +1,50 @@
+[user]
+	email = joel@joeworks.com
+	name = Joseph Lee
+
+[core]
+	eol = lf
+	autocrlf = input
+	safecrlf = false
+	excludesfile = /Users/joseph.lee/.gitignore
+
+[color]
+	status = auto
+	branch = auto
+	interactive = auto
+	diff = auto
+
+[alias]
+	lg = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(bold white)— %an%C(reset)' --abbrev-commit
+	lgm = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(bold white)— %an%C(reset)' --abbrev-commit master..
+	co = checkout
+	br = branch
+	ci = commit
+	st = status
+	last = log -1 HEAD
+	fo = fetch origin -p
+	rb = rebase
+	mg = merge
+	rbm = rebase origin/master
+	mgm = merge origin/master
+
+[diff]
+	guitool = kdiff3
+
+[difftool]
+	prompt = false
+
+[merge]
+	tool = kdiff3
+	conflictstyle = diff3
+
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[credential]
+	helper = 
+	helper = /usr/local/share/gcm-core/git-credential-manager
+[credential "https://dev.azure.com"]
+	useHttpPath = true
