@@ -1,6 +1,9 @@
 # Personal secrets
 .config/fish/fish_variables
 
+# Lock files
+.config/nvim/lazy-lock.json
+
 # Machine-specific files
 .gitconfig.local
 
