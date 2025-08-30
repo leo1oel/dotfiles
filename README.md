@@ -16,28 +16,48 @@ My personal dotfiles managed with [chezmoi](https://www.chezmoi.io/). Includes c
 
 
 ## 🚀 Quick Start (New Mac)
+
+### 1) Install Homebrew (if you don't have it)
 ```bash
-# 1) Install Homebrew (if you don't have it)
-#/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# 2) Install chezmoi
-brew install chezmoi
-
-# 3) Pull & apply my dotfiles in one go
-export GIT_NAME = "Your User Name"        # for .gitconfig
-export GIT_EMAIL="Your Email Address"     # for .gitconfig
-chezmoi init --apply https://github.com/joelee/chezmoi_dotfiles.git
-
-# 4) Install Homebrew packages defined in the Brewfile
-brew bundle --file "$HOME/Brewfile"
-
-# 5) Sanity check
-chezmoi doctor
-
-# 6) Enable Fish Shell
-sudo -sh -c "echo /opt/homebrew/bin/fish >> /etc/shells"
-## Restart your Terminal
-chsh -s /opt/homebrew/bin/fish
-## Restart your terminal again
-
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
+
+### 2) Prepare custom environment data for Chezmoi
+```bash
+mkdir -p "$HOME/.config/chezmoi"
+wget -O "$HOME/.config/chezmoi/chezmoi.toml" https://github.com/joelee/chezmoi_dotfiles/blob/chezmoi_example.toml
+# Edit the chezmoi.toml file with your favourite editor.
+vi "$HOME/.config/chezmoi/chezmoi.toml"
+```
+
+### 3) Install chezmoi
+```bash
+brew install chezmoi
+```
+
+### 4) Pull & apply my dotfiles in one go
+```bash
+chezmoi init --apply https://github.com/joelee/chezmoi_dotfiles.git
+```
+
+### 5) Install Homebrew packages defined in the Brewfile
+```bash
+brew bundle --file "$HOME/.config/Brewfile"
+```
+
+### 6) Sanity check
+```bash
+chezmoi doctor
+```
+
+### 7) Enable Fish Shell
+```bash
+sudo -sh -c "echo /opt/homebrew/bin/fish >> /etc/shells"
+```
+Restart your Terminal
+
+### 8) Activate Fish Shell
+```bash
+chsh -s /opt/homebrew/bin/fish
+```
+Restart your terminal again

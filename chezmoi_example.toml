@@ -1,0 +1,13 @@
+[data]
+# Your Full Name - Use for .gitconfig
+userFullName = "Anonymous User"
+
+# Your Full Name - Use for .gitconfig
+userEmail = "user@example.com"
+
+# Your Full Name - Use for .gitconfig
+userSigningKey = "BA0787C249DC815C"
+
+# Your Home Directory to overwrite $HOME env var [Optional]
+# homeDir = "/Users/nobody"
+

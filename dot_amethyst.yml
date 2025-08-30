@@ -109,6 +109,7 @@ floating:
   - com.apple.calculator
   - com.apple.DiskUtility
   - com.apple.VoiceOverUtility
+  - com.nuebling.mac-mouse-fix
   - com.runningwithcrayons.Alfred
   - com.stairways.keyboardmaestro.editor
   - com.nordvpn.NordVPN
