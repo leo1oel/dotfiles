@@ -25,7 +25,7 @@ My personal dotfiles managed with [chezmoi](https://www.chezmoi.io/). Includes c
 ### 2) Prepare custom environment data for Chezmoi
 ```bash
 mkdir -p "$HOME/.config/chezmoi"
-wget -O "$HOME/.config/chezmoi/chezmoi.toml" https://github.com/joelee/chezmoi_dotfiles/blob/chezmoi_example.toml
+wget -O "$HOME/.config/chezmoi/chezmoi.toml" https://raw.githubusercontent.com/joelee/chezmoi_dotfiles/eb7e0811d2ee6c66098a97072a35bfcc07a9500d/chezmoi_example.toml
 # Edit the chezmoi.toml file with your favourite editor.
 vi "$HOME/.config/chezmoi/chezmoi.toml"
 ```
