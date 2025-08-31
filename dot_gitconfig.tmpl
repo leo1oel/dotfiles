@@ -1,7 +1,7 @@
 [user]
   name = {{ env "GIT_NAME" | default .userFullName | default "Anonymous" }}
   email = {{ env "GIT_EMAIL" | default .userEmail | default "nobody@example.com" }}
-  {{ if .userSigningKey }}
+  {{ if default .userSigningKey }}
     signingkey = {{ .userSigningKey }}
   {{ else if env "GIT_SIGNING_KEY" }}
     signingkey = {{ env "GIT_SIGNING_KEY" }}
@@ -70,3 +70,4 @@
 [include]
   path = ~/.gitconfig.local
 
+#
