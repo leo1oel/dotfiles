@@ -32,12 +32,13 @@ Some highlights of what are the included configurations:
 - 🐚 **Fish Shell** customisations with completions and plugins + aliases.
 - ✨ **Starship prompt** for a fast, informative shell experience.
 - 🧪 My custom **Neovim** IDE configuration (LazyVim-based config).
-- 🖥️ Terminal: Alacritty & Kitty
+- 🖥️ Terminal: **Alacritty** & **Kitty**
 - 🧩 Development environments for **Python**, **Rust**, **Go**. and **Node.js**.
-- 🧰 CLI Tools: `fzf`, `zoxide`, `direnv`, `asdf`, `docker`, and lots more...
+- 🧰 CLI Tools: `fzf`, `zoxide`, `diner`, `asdf`, `docker`, and lots more...
 - 🪟 MacOS Tiling Window Management: **Amethyst** layouts.
+- ⌨️ **Kanata** custom keyboard layout to support **Home row mods** 
 - 🗄️ **Git** configuration tuned for project-based identities.
-- 📦 Package Management: Homebrew (Brewfile)
+- 📦 Package Management: **Homebrew** (Brewfile)
 
 ---
 
