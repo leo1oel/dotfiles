@@ -45,7 +45,7 @@ Some highlights of what are the included configurations:
 ## 🚀 One Line Quick Start!
 To set up these `Dotfiles` on your machine, run:
 ```bash
-sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply joelee
+sh -c "$(curl -fsLS get.chezmoi.io)" -- init --prompt --apply joelee
 ```
 This will:
 1. Install chezmoi (if not already installed).
@@ -64,41 +64,33 @@ This will:
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-### 2) Prepare custom environment data for Chezmoi
-```bash
-mkdir -p "$HOME/.config/chezmoi"
-wget -O "$HOME/.config/chezmoi/chezmoi.toml" https://raw.githubusercontent.com/joelee/chezmoi_dotfiles/eb7e0811d2ee6c66098a97072a35bfcc07a9500d/chezmoi_example.toml
-# Edit the chezmoi.toml file with your favourite editor.
-vi "$HOME/.config/chezmoi/chezmoi.toml"
-```
-
-### 3) Install chezmoi
+### 2) Install chezmoi
 ```bash
 brew install chezmoi
 ```
 
-### 4) Pull & apply my dotfiles in one go
+### 3) Pull & apply my dotfiles in one go
 ```bash
-chezmoi init --apply https://github.com/joelee/chezmoi_dotfiles.git
+chezmoi init --prompt --apply joelee
 ```
 
-### 5) Install Homebrew packages defined in the Brewfile
+### 4) Install Homebrew packages defined in the Brewfile
 ```bash
 brew bundle --file "$HOME/.config/Brewfile"
 ```
 
-### 6) Sanity check
+### 5) Sanity check
 ```bash
 chezmoi doctor
 ```
 
-### 7) Enable Fish Shell
+### 6) Enable Fish Shell
 ```bash
 sudo -sh -c "echo /opt/homebrew/bin/fish >> /etc/shells"
 ```
 Restart your Terminal
 
-### 8) Activate Fish Shell
+### 7) Activate Fish Shell
 ```bash
 chsh -s /opt/homebrew/bin/fish
 ```

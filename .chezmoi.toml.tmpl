@@ -1,0 +1,8 @@
+{{- $userFullName := promptStringOnce . "userFullName" "Your Full Name - use for .gitconfig" -}}
+{{- $user Email := promptStringOnce . "userEmail" "Your Email Address - use for .gitconfig" -}}
+
+
+[data]
+userFullName = {{ $userFullName | quote }}
+userEmail = {{ $userEmail | quote }}
+
