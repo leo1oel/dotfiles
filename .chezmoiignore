@@ -14,3 +14,15 @@
 .envrc
 .env
 
+# Ignore MacOS specific files on non-Macs
+{{ if ne .chezmoi.os "darwin" }}
+Library/Application Support/
+.amethyst.yml
+{{ end }}
+
+
+# Ignore Linix specific files on non-Linux machine (ToDo)
+# {{ if ne .chezmoi.os "linux" }}
+# .config/app/file.conf
+# {{ end }}
+

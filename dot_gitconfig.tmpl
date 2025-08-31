@@ -34,9 +34,6 @@
   rbm = rebase origin/master
   mgm = merge origin/master
 
-[diff]
-  tool = meld
-
 [difftool]
   prompt = false
 
@@ -50,8 +47,13 @@
 [merge]
   conflictStyle = zdiff3
 
+{{ if eq .chezmoi.os "darwin" }}
+[diff]
+  tool = meld
+
 [difftool "meld"]
   cmd = /Applications/Meld.app/Contents/MacOS/Meld $LOCAL $REMOTE
+{{ end }}
 
 [filter "lfs"]
   clean = git-lfs clean -- %f
