@@ -49,30 +49,27 @@ else
 fi
 
 #################
-# Ensure Node.js is installed (required for npm packages)
+# Install fnm and Node.js LTS (required for Claude Code and Codex)
 #################
-if ! command -v node >/dev/null 2>&1; then
-    # First, install fnm if not present
-    if ! command -v fnm >/dev/null 2>&1; then
-        echo "📦 Installing fnm (Fast Node Manager)..."
-        curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
-        # Add fnm to PATH for this session
-        export PATH="$HOME/.local/share/fnm:$PATH"
-        eval "$(fnm env --use-on-cd)"
-    fi
+# Install fnm if not present
+if ! command -v fnm >/dev/null 2>&1; then
+    echo "📦 Installing fnm (Fast Node Manager)..."
+    curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
+    export PATH="$HOME/.local/share/fnm:$PATH"
+    echo "✅ fnm installed"
+fi
 
-    # Now install Node.js via fnm
-    if command -v fnm >/dev/null 2>&1; then
-        echo "📦 Installing Node.js LTS via fnm..."
-        fnm install --lts
-        fnm use lts-latest
-        # Ensure node is in PATH
-        eval "$(fnm env)"
-        echo "✅ Node.js installed via fnm"
-    else
-        echo "⚠️  fnm installation failed. Installing Node.js via apt..."
-        sudo apt install -y nodejs npm
-    fi
+# Always ensure we have Node.js LTS via fnm
+if command -v fnm >/dev/null 2>&1; then
+    echo "📦 Installing Node.js LTS via fnm..."
+    eval "$(fnm env --use-on-cd)"
+    fnm install --lts
+    fnm default lts-latest
+    eval "$(fnm env)"
+    echo "✅ Node.js $(node -v) ready"
+else
+    echo "⚠️  fnm installation failed. Please install Node.js >= 18 manually."
+    exit 1
 fi
 
 #################
