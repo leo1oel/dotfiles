@@ -1,7 +1,8 @@
 if type -q fzf
     # Try to initialize fzf for fish
-    if test -n (fzf --help 2>&1 | grep -o -- '--fish')
-        # fzf supports --fish option (newer versions)
+    # Check if fzf supports --fish option (fzf >= 0.48.0)
+    if fzf --fish &>/dev/null
+        # New way: fzf supports --fish option
         fzf --fish | source
     else
         # Fallback for older fzf versions
