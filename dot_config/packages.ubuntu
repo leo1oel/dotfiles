@@ -51,25 +51,6 @@ python3-venv
 python3-dev
 python-is-python3
 
-# Go
-golang
-
-# Java
-openjdk-17-jdk
-openjdk-17-jre
-
-# PHP
-php
-php-cli
-php-mbstring
-php-xml
-
-# Ruby
-ruby
-ruby-dev
-
-# Node.js (managed via fnm, installed in run_once script)
-
 # ===========================================
 # Python Development Tools
 # ===========================================
@@ -124,21 +105,6 @@ git-flow
 tig
 # git-delta - installed via download in run_once script
 # lazygit - installed via PPA in run_once script
-
-# ===========================================
-# Database Tools
-# ===========================================
-sqlite3
-postgresql-client
-mysql-client
-redis-tools
-
-# ===========================================
-# Cloud CLI Tools
-# ===========================================
-# awscli - install via uv tool
-# azure-cli - requires Microsoft repo
-# terraform - install via HashiCorp repo
 
 # ===========================================
 # LSP Servers & Language Tools (available via apt)
@@ -209,7 +175,7 @@ tk-dev
 # - uv (via curl installer)
 # - eza (via custom repo)
 # - helix (via PPA: ppa:maveonair/helix-editor)
-# - lazygit (via PPA: ppa:lazygit-team/daily)
+# - lazygit (via GitHub release download)
 # - git-delta (via GitHub release download)
 # - chezmoi (via snap or curl installer)
 # - zellij (via GitHub release download or cargo)
