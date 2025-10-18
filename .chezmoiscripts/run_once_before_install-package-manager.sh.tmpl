@@ -51,6 +51,12 @@ echo "📦 Updating package lists..."
 sudo apt update
 
 #################
+# Install required packages for PPA management
+#################
+echo "📦 Installing software-properties-common..."
+sudo apt install -y software-properties-common
+
+#################
 # Fish Shell
 #################
 if command -v fish >/dev/null 2>&1; then
