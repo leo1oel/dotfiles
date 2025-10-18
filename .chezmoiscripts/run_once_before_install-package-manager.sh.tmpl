@@ -67,14 +67,23 @@ else
     sudo apt-add-repository ppa:fish-shell/release-3 -y
     sudo apt update
     sudo apt install fish -y
-
-    # Set Fish as default shell
-    echo "🐚 Setting Fish as default shell..."
-    if ! grep -q "$(which fish)" /etc/shells; then
-        echo "$(which fish)" | sudo tee -a /etc/shells
-    fi
-    chsh -s "$(which fish)"
     echo "✅ Fish shell installation complete."
+fi
+
+# Set Fish as default shell (runs whether Fish was just installed or already existed)
+echo "🐚 Setting Fish as default shell..."
+FISH_PATH=$(which fish)
+if ! grep -q "$FISH_PATH" /etc/shells; then
+    echo "$FISH_PATH" | sudo tee -a /etc/shells
+fi
+
+# Check current default shell
+CURRENT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
+if [ "$CURRENT_SHELL" != "$FISH_PATH" ]; then
+    chsh -s "$FISH_PATH"
+    echo "✅ Fish set as default shell. Please logout and login again for this to take effect."
+else
+    echo "✅ Fish is already the default shell."
 fi
 
 #################

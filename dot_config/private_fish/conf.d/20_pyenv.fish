@@ -8,6 +8,4 @@ if type -q pyenv
     if type -q pyenv-virtualenv
         pyenv virtualenv-init - | source
     end
-else
-    echo "PyEnv was not installed."
 end
