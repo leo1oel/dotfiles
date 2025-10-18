@@ -21,9 +21,6 @@ LICENSE
 .envrc
 .env
 
-# Brewfile is managed internally by Chezmoi run once script
-.config/Brewfile
-
 # Ignore macOS specific files on non-Macs
 {{ if ne .chezmoi.os "darwin" }}
 .config/Brewfile
