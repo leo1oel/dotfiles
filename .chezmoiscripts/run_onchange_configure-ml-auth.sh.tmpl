@@ -35,7 +35,10 @@ fi
 # wandb
 #################
 if command -v wandb >/dev/null 2>&1; then
-    if wandb verify >/dev/null 2>&1; then
+    # Check wandb config file instead of using 'wandb verify' (which can be unreliable)
+    if [ -f ~/.netrc ] && grep -q "api.wandb.ai" ~/.netrc 2>/dev/null; then
+        echo "✅ wandb is authenticated"
+    elif [ -f ~/.config/wandb/settings ] && grep -q "api_key" ~/.config/wandb/settings 2>/dev/null; then
         echo "✅ wandb is authenticated"
     else
         echo "⚠️  wandb not authenticated. Run: wandb login"
