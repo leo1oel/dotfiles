@@ -61,7 +61,6 @@ brew "ruff"
 # ===========================================
 # Node.js Development
 # ===========================================
-brew "fnm"
 brew "typescript-language-server"
 brew "prettier"
 brew "biome"

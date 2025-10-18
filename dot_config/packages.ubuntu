@@ -170,16 +170,15 @@ tk-dev
 # These are handled by run_once_before_install-package-manager.sh.tmpl:
 # - fish (via PPA: ppa:fish-shell/release-3)
 # - starship (via curl installer)
-# - fnm (via curl installer)
 # - uv (via curl installer)
-# - eza (via custom repo)
+# - eza (via custom repo with GPG)
 # - lazygit (via GitHub release download)
 # - git-delta (via GitHub release download)
-# - chezmoi (via snap or curl installer)
-# - zellij (via GitHub release download or cargo)
+# - chezmoi (via curl installer)
+# - zellij (via GitHub release download)
 #
 # Python tools (install via uv tool after setup):
 # - poetry, black, ruff, pyright, etc.
 #
-# Node.js tools (install via npm after fnm setup):
-# - typescript-language-server, prettier, etc.
+# Node.js tools (install via npm after installing node):
+# - typescript-language-server, prettier, biome, etc.

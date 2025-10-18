@@ -94,17 +94,13 @@ if ! command -v uv >/dev/null 2>&1; then
     curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
 
-# fnm (Fast Node Manager)
-if ! command -v fnm >/dev/null 2>&1; then
-    echo "📦 Installing fnm..."
-    curl -fsSL https://fnm.vercel.app/install | bash || echo "⚠️  fnm installation failed, skipping..."
-fi
-
 #################
 # eza (better ls)
 #################
 if ! command -v eza >/dev/null 2>&1; then
     echo "📦 Installing eza..."
+    # Install GPG first
+    sudo apt install -y gpg
     sudo mkdir -p /etc/apt/keyrings
     if wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg 2>/dev/null; then
         echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
