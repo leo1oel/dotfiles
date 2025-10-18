@@ -1,0 +1,127 @@
+#!/bin/bash
+
+set -e
+
+{{ if eq .chezmoi.os "linux" -}}
+#################
+# ML & Dev Tools for Ubuntu
+#################
+
+echo "🤖 Installing ML and development tools..."
+
+#################
+# GitHub CLI
+#################
+if ! command -v gh >/dev/null 2>&1; then
+    echo "📦 Installing GitHub CLI..."
+    # Add GitHub CLI repository
+    type -p curl >/dev/null || sudo apt install curl -y
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+    sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+    sudo apt update
+    sudo apt install gh -y
+    echo "✅ GitHub CLI installed"
+else
+    echo "✅ GitHub CLI is already installed"
+fi
+
+#################
+# Ensure pipx is available
+#################
+if ! command -v pipx >/dev/null 2>&1; then
+    echo "📦 Installing pipx..."
+    sudo apt install pipx -y
+    pipx ensurepath
+fi
+
+#################
+# Hugging Face CLI
+#################
+if ! command -v huggingface-cli >/dev/null 2>&1; then
+    echo "📦 Installing Hugging Face CLI..."
+    pipx install huggingface_hub[cli]
+    echo "✅ Hugging Face CLI installed"
+else
+    echo "✅ Hugging Face CLI is already installed"
+fi
+
+#################
+# wandb
+#################
+if ! command -v wandb >/dev/null 2>&1; then
+    echo "📦 Installing wandb..."
+    pipx install wandb
+    echo "✅ wandb installed"
+else
+    echo "✅ wandb is already installed"
+fi
+
+#################
+# Configure Authentication
+#################
+echo ""
+echo "🔐 Authentication Setup"
+echo "======================="
+echo ""
+echo "To complete the setup, run these commands:"
+echo ""
+echo "1. Login to GitHub:"
+echo "   gh auth login"
+echo ""
+echo "2. Login to Hugging Face (get token from https://huggingface.co/settings/tokens):"
+echo "   huggingface-cli login"
+echo ""
+echo "3. Login to Weights & Biases (get API key from https://wandb.ai/authorize):"
+echo "   wandb login"
+echo ""
+echo "Or create a one-time setup script by running:"
+echo "   echo '#!/bin/bash' > ~/setup-ml-auth.sh"
+echo "   echo 'gh auth login' >> ~/setup-ml-auth.sh"
+echo "   echo 'huggingface-cli login' >> ~/setup-ml-auth.sh"
+echo "   echo 'wandb login' >> ~/setup-ml-auth.sh"
+echo "   chmod +x ~/setup-ml-auth.sh"
+echo "   ~/setup-ml-auth.sh"
+echo ""
+
+{{ else if eq .chezmoi.os "darwin" -}}
+#################
+# ML & Dev Tools for macOS (via Homebrew)
+#################
+
+echo "🤖 Installing ML and development tools on macOS..."
+
+# GitHub CLI
+if ! command -v gh >/dev/null 2>&1; then
+    echo "📦 Installing GitHub CLI..."
+    brew install gh
+else
+    echo "✅ GitHub CLI is already installed"
+fi
+
+# Hugging Face CLI
+if ! command -v huggingface-cli >/dev/null 2>&1; then
+    echo "📦 Installing Hugging Face CLI..."
+    pipx install huggingface_hub[cli]
+else
+    echo "✅ Hugging Face CLI is already installed"
+fi
+
+# wandb
+if ! command -v wandb >/dev/null 2>&1; then
+    echo "📦 Installing wandb..."
+    pipx install wandb
+else
+    echo "✅ wandb is already installed"
+fi
+
+echo ""
+echo "🔐 Authentication Setup"
+echo "======================="
+echo "Run these commands to authenticate:"
+echo "  gh auth login"
+echo "  huggingface-cli login"
+echo "  wandb login"
+echo ""
+
+{{ end -}}

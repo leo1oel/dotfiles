@@ -1,0 +1,83 @@
+#!/bin/bash
+
+# This script runs whenever ML auth tokens change
+# Hash: auto-login-ml-tools-v1
+
+{{ if eq .chezmoi.os "linux" -}}
+
+set -e
+
+echo "🔐 Configuring ML tool authentication..."
+
+#################
+# GitHub CLI Authentication
+#################
+if command -v gh >/dev/null 2>&1; then
+    if ! gh auth status >/dev/null 2>&1; then
+        echo "🔑 Setting up GitHub authentication..."
+        echo "Please run: gh auth login"
+        echo "Or set GITHUB_TOKEN environment variable and run: echo \$GITHUB_TOKEN | gh auth login --with-token"
+    else
+        echo "✅ GitHub CLI is already authenticated"
+    fi
+fi
+
+#################
+# Hugging Face CLI Authentication
+#################
+if command -v huggingface-cli >/dev/null 2>&1; then
+    # Check if already logged in
+    if huggingface-cli whoami >/dev/null 2>&1; then
+        echo "✅ Hugging Face CLI is already authenticated"
+    else
+        echo "🔑 Hugging Face authentication needed..."
+
+        # Try to get token from pass (password manager)
+        HF_TOKEN="{{ secret "api-keys/huggingface" "" }}"
+
+        if [ -n "$HF_TOKEN" ] && [ "$HF_TOKEN" != "" ]; then
+            echo "🔐 Logging in to Hugging Face with saved token..."
+            huggingface-cli login --token "$HF_TOKEN" --add-to-git-credential
+            echo "✅ Hugging Face authentication complete"
+        else
+            echo "⚠️  No Hugging Face token found in password store."
+            echo "Please save your token with: pass insert api-keys/huggingface"
+            echo "Or login manually: huggingface-cli login"
+        fi
+    fi
+fi
+
+#################
+# Weights & Biases Authentication
+#################
+if command -v wandb >/dev/null 2>&1; then
+    # Check if already logged in
+    if wandb verify >/dev/null 2>&1; then
+        echo "✅ wandb is already authenticated"
+    else
+        echo "🔑 wandb authentication needed..."
+
+        # Try to get API key from pass
+        WANDB_API_KEY="{{ secret "api-keys/wandb" "" }}"
+
+        if [ -n "$WANDB_API_KEY" ] && [ "$WANDB_API_KEY" != "" ]; then
+            echo "🔐 Logging in to wandb with saved API key..."
+            wandb login "$WANDB_API_KEY"
+            echo "✅ wandb authentication complete"
+        else
+            echo "⚠️  No wandb API key found in password store."
+            echo "Please save your API key with: pass insert api-keys/wandb"
+            echo "Or login manually: wandb login"
+        fi
+    fi
+fi
+
+echo ""
+echo "✅ ML tools authentication configuration complete!"
+echo ""
+echo "📝 To save your tokens for automatic login:"
+echo "   pass insert api-keys/huggingface"
+echo "   pass insert api-keys/wandb"
+echo ""
+
+{{ end -}}
