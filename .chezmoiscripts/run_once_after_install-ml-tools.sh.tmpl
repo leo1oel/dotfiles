@@ -27,31 +27,22 @@ else
 fi
 
 #################
-# Ensure pipx is available
-#################
-if ! command -v pipx >/dev/null 2>&1; then
-    echo "📦 Installing pipx..."
-    sudo apt install pipx -y
-    pipx ensurepath
-fi
-
-#################
-# Hugging Face CLI
+# Hugging Face CLI (via uv tool)
 #################
 if ! command -v huggingface-cli >/dev/null 2>&1; then
     echo "📦 Installing Hugging Face CLI..."
-    pipx install huggingface_hub[cli]
+    uv tool install huggingface-hub
     echo "✅ Hugging Face CLI installed"
 else
     echo "✅ Hugging Face CLI is already installed"
 fi
 
 #################
-# wandb
+# wandb (via uv tool)
 #################
 if ! command -v wandb >/dev/null 2>&1; then
     echo "📦 Installing wandb..."
-    pipx install wandb
+    uv tool install wandb
     echo "✅ wandb installed"
 else
     echo "✅ wandb is already installed"
@@ -75,18 +66,16 @@ echo ""
 echo "3. Login to Weights & Biases (get API key from https://wandb.ai/authorize):"
 echo "   wandb login"
 echo ""
-echo "Or create a one-time setup script by running:"
-echo "   echo '#!/bin/bash' > ~/setup-ml-auth.sh"
-echo "   echo 'gh auth login' >> ~/setup-ml-auth.sh"
-echo "   echo 'huggingface-cli login' >> ~/setup-ml-auth.sh"
-echo "   echo 'wandb login' >> ~/setup-ml-auth.sh"
-echo "   chmod +x ~/setup-ml-auth.sh"
-echo "   ~/setup-ml-auth.sh"
+echo "Or save tokens to password store for auto-login:"
+echo "   pass init \"\$(git config user.email)\""
+echo "   pass insert api-keys/huggingface"
+echo "   pass insert api-keys/wandb"
+echo "   chezmoi apply"
 echo ""
 
 {{ else if eq .chezmoi.os "darwin" -}}
 #################
-# ML & Dev Tools for macOS (via Homebrew)
+# ML & Dev Tools for macOS (via Homebrew + uv)
 #################
 
 echo "🤖 Installing ML and development tools on macOS..."
@@ -99,18 +88,18 @@ else
     echo "✅ GitHub CLI is already installed"
 fi
 
-# Hugging Face CLI
+# Hugging Face CLI (via uv tool)
 if ! command -v huggingface-cli >/dev/null 2>&1; then
     echo "📦 Installing Hugging Face CLI..."
-    pipx install huggingface_hub[cli]
+    uv tool install huggingface-hub
 else
     echo "✅ Hugging Face CLI is already installed"
 fi
 
-# wandb
+# wandb (via uv tool)
 if ! command -v wandb >/dev/null 2>&1; then
     echo "📦 Installing wandb..."
-    pipx install wandb
+    uv tool install wandb
 else
     echo "✅ wandb is already installed"
 fi

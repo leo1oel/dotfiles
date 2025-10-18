@@ -73,9 +73,9 @@ ruby-dev
 # ===========================================
 # Python Development Tools
 # ===========================================
-pipx
+# uv - installed via curl installer in run_once script
 # pyenv - will be installed via git clone
-# poetry - install via pipx
+# poetry - install via uv tool
 
 # ===========================================
 # Containers & Virtualization
@@ -136,7 +136,7 @@ redis-tools
 # ===========================================
 # Cloud CLI Tools
 # ===========================================
-# awscli - install via pip/pipx
+# awscli - install via uv tool
 # azure-cli - requires Microsoft repo
 # terraform - install via HashiCorp repo
 
@@ -214,7 +214,7 @@ tk-dev
 # - chezmoi (via snap or curl installer)
 # - zellij (via GitHub release download or cargo)
 #
-# Python tools (install via pipx after setup):
+# Python tools (install via uv tool after setup):
 # - poetry, black, ruff, pyright, etc.
 #
 # Node.js tools (install via npm after fnm setup):
