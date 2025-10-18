@@ -1,9 +1,11 @@
 #!/bin/bash
 
+set -e
 
 {{ if eq .chezmoi.os "darwin" -}}
-
-set -e
+#################
+# macOS - Homebrew
+#################
 
 # Check if Homebrew is installed
 if command -v brew >/dev/null 2>&1; then
@@ -24,7 +26,6 @@ else
     echo "✅ Homebrew installation complete."
 fi
 
-
 #################
 # Fish Shell
 #################
@@ -33,22 +34,161 @@ if command -v fish >/dev/null 2>&1; then
 else
     echo "🚀 Fish shell not found. Installing..."
     brew install fish
-    echo "Your password may required to enable the Fish shell..."
+    echo "Your password may be required to enable the Fish shell..."
     sudo sh -c "echo /opt/homebrew/bin/fish >> /etc/shells"
     chsh -s /opt/homebrew/bin/fish
 fi
 
-{{ end -}}
+{{ else if eq .chezmoi.os "linux" -}}
+#################
+# Linux - APT
+#################
 
+echo "🐧 Setting up Linux environment..."
 
-###############
-# Rust
-###############
-if command -v rustup >/dev/null 2>&1; then
-  echo "🦀 Configuring Rust development environment..."
-  rustup default stable
-  if [[ ! -d "$HOME/.config/fish/completions" ]]; then
-    mkdir -p "$HOME/.config/fish/completions"
-  fi
-  rustup completions fish > "$HOME/.config/fish/completions/rustup.fish"
+# Update package lists
+echo "📦 Updating package lists..."
+sudo apt update
+
+#################
+# Fish Shell
+#################
+if command -v fish >/dev/null 2>&1; then
+    echo "✅ Fish shell is already installed at $(command -v fish)"
+else
+    echo "🚀 Installing Fish shell..."
+    # Add Fish shell PPA for latest version
+    sudo apt-add-repository ppa:fish-shell/release-3 -y
+    sudo apt update
+    sudo apt install fish -y
+
+    # Set Fish as default shell
+    echo "🐚 Setting Fish as default shell..."
+    if ! grep -q "$(which fish)" /etc/shells; then
+        echo "$(which fish)" | sudo tee -a /etc/shells
+    fi
+    chsh -s "$(which fish)"
+    echo "✅ Fish shell installation complete."
 fi
+
+#################
+# Add PPAs
+#################
+echo "📦 Adding required PPAs..."
+
+# Helix editor PPA
+if ! grep -q "maveonair/helix-editor" /etc/apt/sources.list.d/*.list 2>/dev/null; then
+    echo "Adding Helix editor PPA..."
+    sudo apt-add-repository ppa:maveonair/helix-editor -y
+fi
+
+# LazyGit PPA
+if ! grep -q "lazygit-team" /etc/apt/sources.list.d/*.list 2>/dev/null; then
+    echo "Adding LazyGit PPA..."
+    sudo apt-add-repository ppa:lazygit-team/daily -y
+fi
+
+sudo apt update
+
+#################
+# Install from PPAs
+#################
+echo "📦 Installing tools from PPAs..."
+
+if ! command -v helix >/dev/null 2>&1; then
+    sudo apt install helix -y
+fi
+
+if ! command -v lazygit >/dev/null 2>&1; then
+    sudo apt install lazygit -y
+fi
+
+#################
+# Essential tools (via curl installers)
+#################
+echo "🔧 Installing essential tools via curl installers..."
+
+# Starship prompt
+if ! command -v starship >/dev/null 2>&1; then
+    echo "🚀 Installing Starship prompt..."
+    curl -sS https://starship.rs/install.sh | sh -s -- -y
+fi
+
+# uv (Python package manager)
+if ! command -v uv >/dev/null 2>&1; then
+    echo "📦 Installing uv..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+
+# fnm (Fast Node Manager)
+if ! command -v fnm >/dev/null 2>&1; then
+    echo "📦 Installing fnm..."
+    curl -fsSL https://fnm.vercel.app/install | bash
+fi
+
+#################
+# eza (better ls)
+#################
+if ! command -v eza >/dev/null 2>&1; then
+    echo "📦 Installing eza..."
+    sudo mkdir -p /etc/apt/keyrings
+    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
+    sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
+    sudo apt update
+    sudo apt install -y eza
+fi
+
+#################
+# git-delta (better git diff)
+#################
+if ! command -v delta >/dev/null 2>&1; then
+    echo "📦 Installing git-delta..."
+    DELTA_VERSION=$(curl -s https://api.github.com/repos/dandavison/delta/releases/latest | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+    wget "https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/git-delta_${DELTA_VERSION}_amd64.deb" -O /tmp/git-delta.deb
+    sudo dpkg -i /tmp/git-delta.deb
+    rm /tmp/git-delta.deb
+fi
+
+#################
+# zellij (terminal multiplexer)
+#################
+if ! command -v zellij >/dev/null 2>&1; then
+    echo "📦 Installing zellij..."
+    # Install via direct download
+    ZELLIJ_VERSION=$(curl -s https://api.github.com/repos/zellij-org/zellij/releases/latest | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+    wget "https://github.com/zellij-org/zellij/releases/download/${ZELLIJ_VERSION}/zellij-x86_64-unknown-linux-musl.tar.gz" -O /tmp/zellij.tar.gz
+    tar -xzf /tmp/zellij.tar.gz -C /tmp
+    sudo mv /tmp/zellij /usr/local/bin/
+    sudo chmod +x /usr/local/bin/zellij
+    rm /tmp/zellij.tar.gz
+fi
+
+#################
+# chezmoi
+#################
+if ! command -v chezmoi >/dev/null 2>&1; then
+    echo "📦 Installing chezmoi..."
+    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+fi
+
+#################
+# Create symlinks for renamed commands
+#################
+echo "🔗 Creating symlinks for commands with different names on Ubuntu..."
+
+mkdir -p "$HOME/.local/bin"
+
+# bat -> batcat
+if command -v batcat >/dev/null 2>&1 && ! command -v bat >/dev/null 2>&1; then
+    ln -sf "$(which batcat)" "$HOME/.local/bin/bat"
+fi
+
+# fd -> fdfind
+if command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then
+    ln -sf "$(which fdfind)" "$HOME/.local/bin/fd"
+fi
+
+echo "✅ Linux setup complete."
+
+{{ end -}}

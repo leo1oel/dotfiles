@@ -1,0 +1,221 @@
+# Ubuntu/Debian package list
+# Equivalent to Brewfile for apt package manager
+# Install with: xargs -a packages.ubuntu sudo apt install -y (filters comments automatically)
+
+# ===========================================
+# Core Development Tools
+# ===========================================
+git
+build-essential
+curl
+wget
+cmake
+pkg-config
+software-properties-common
+ca-certificates
+gnupg
+lsb-release
+
+# ===========================================
+# Shell & Terminal
+# ===========================================
+# fish - installed via PPA in run_once script
+tmux
+
+# ===========================================
+# Modern CLI Tools (Rust-based alternatives)
+# ===========================================
+ripgrep              # rg - better grep
+bat                  # better cat (command is 'batcat' on Ubuntu)
+fd-find              # fd - better find (command is 'fdfind' on Ubuntu)
+fzf                  # fuzzy finder
+zoxide               # smart cd (Ubuntu 22.04+)
+# eza - better ls (requires custom repo, installed in run_once script)
+# zellij - terminal multiplexer (not in apt, will be installed via cargo/download)
+
+# ===========================================
+# Editors
+# ===========================================
+neovim
+vim
+nano
+# helix - installed via PPA in run_once script
+
+# ===========================================
+# Programming Languages & Runtimes
+# ===========================================
+# Python
+python3
+python3-pip
+python3-venv
+python3-dev
+python-is-python3
+
+# Go
+golang
+
+# Java
+openjdk-17-jdk
+openjdk-17-jre
+
+# PHP
+php
+php-cli
+php-mbstring
+php-xml
+
+# Ruby
+ruby
+ruby-dev
+
+# Node.js (managed via fnm, installed in run_once script)
+
+# ===========================================
+# Python Development Tools
+# ===========================================
+pipx
+# pyenv - will be installed via git clone
+# poetry - install via pipx
+
+# ===========================================
+# Containers & Virtualization
+# ===========================================
+docker.io
+docker-compose
+docker-buildx
+
+# ===========================================
+# Development Tools
+# ===========================================
+direnv
+jq
+yq
+tree
+htop
+btop
+ncdu
+
+# ===========================================
+# Network Tools
+# ===========================================
+httpie
+net-tools
+dnsutils
+traceroute
+nmap
+openssh-client
+openssh-server
+
+# ===========================================
+# File Tools & Archives
+# ===========================================
+p7zip-full
+p7zip-rar
+unzip
+zip
+rsync
+rclone
+
+# ===========================================
+# Git Tools
+# ===========================================
+git-lfs
+git-flow
+tig
+# git-delta - installed via download in run_once script
+# lazygit - installed via PPA in run_once script
+
+# ===========================================
+# Database Tools
+# ===========================================
+sqlite3
+postgresql-client
+mysql-client
+redis-tools
+
+# ===========================================
+# Cloud CLI Tools
+# ===========================================
+# awscli - install via pip/pipx
+# azure-cli - requires Microsoft repo
+# terraform - install via HashiCorp repo
+
+# ===========================================
+# LSP Servers & Language Tools (available via apt)
+# ===========================================
+bash-language-server
+yaml-language-server
+# typescript-language-server - install via npm
+# python LSPs - install via pip (pyright, python-lsp-server)
+# rust-analyzer - not needed (no Rust dev)
+
+# ===========================================
+# Formatters & Linters
+# ===========================================
+shellcheck
+shfmt
+# prettier - install via npm
+# black - install via pip
+# ruff - install via pip or cargo
+
+# ===========================================
+# Misc Utilities
+# ===========================================
+tldr
+man-db
+info
+# fastfetch - installed via PPA or download in run_once script
+neofetch
+figlet
+lolcat
+
+# ===========================================
+# System Monitoring
+# ===========================================
+iotop
+sysstat
+lm-sensors
+
+# ===========================================
+# Build Dependencies (for compiling from source)
+# ===========================================
+autoconf
+automake
+libtool
+make
+ninja-build
+meson
+
+# Libraries often needed
+libssl-dev
+libreadline-dev
+libffi-dev
+libbz2-dev
+liblzma-dev
+libncurses5-dev
+libncursesw5-dev
+libsqlite3-dev
+libgdbm-dev
+libdb-dev
+tk-dev
+
+# ===========================================
+# NOTES - Packages requiring special installation:
+# ===========================================
+# These are handled by run_once_before_install-package-manager.sh.tmpl:
+# - fish (via PPA: ppa:fish-shell/release-3)
+# - starship (via curl installer)
+# - fnm (via curl installer)
+# - uv (via curl installer)
+# - eza (via custom repo)
+# - helix (via PPA: ppa:maveonair/helix-editor)
+# - lazygit (via PPA: ppa:lazygit-team/daily)
+# - git-delta (via GitHub release download)
+# - chezmoi (via snap or curl installer)
+# - zellij (via GitHub release download or cargo)
+#
+# Python tools (install via pipx after setup):
+# - poetry, black, ruff, pyright, etc.
+#
+# Node.js tools (install via npm after fnm setup):
+# - typescript-language-server, prettier, etc.
