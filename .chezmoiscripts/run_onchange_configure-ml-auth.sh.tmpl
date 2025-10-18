@@ -1,83 +1,54 @@
 #!/bin/bash
 
-# This script runs whenever ML auth tokens change
-# Hash: auto-login-ml-tools-v1
+# This script runs whenever AI/ML CLI auth changes
+# Hash: ai-ml-cli-auth-v1
 
 {{ if eq .chezmoi.os "linux" -}}
 
 set -e
 
-echo "🔐 Configuring ML tool authentication..."
+echo "🔐 Checking AI/ML CLI authentication status..."
 
 #################
-# GitHub CLI Authentication
+# GitHub CLI
 #################
 if command -v gh >/dev/null 2>&1; then
-    if ! gh auth status >/dev/null 2>&1; then
-        echo "🔑 Setting up GitHub authentication..."
-        echo "Please run: gh auth login"
-        echo "Or set GITHUB_TOKEN environment variable and run: echo \$GITHUB_TOKEN | gh auth login --with-token"
+    if gh auth status >/dev/null 2>&1; then
+        echo "✅ GitHub CLI is authenticated"
     else
-        echo "✅ GitHub CLI is already authenticated"
+        echo "⚠️  GitHub CLI not authenticated. Run: gh auth login"
     fi
 fi
 
 #################
-# Hugging Face CLI Authentication
+# Hugging Face CLI
 #################
-if command -v huggingface-cli >/dev/null 2>&1; then
-    # Check if already logged in
-    if huggingface-cli whoami >/dev/null 2>&1; then
-        echo "✅ Hugging Face CLI is already authenticated"
+if command -v hf >/dev/null 2>&1; then
+    if hf auth whoami >/dev/null 2>&1; then
+        echo "✅ Hugging Face CLI is authenticated"
     else
-        echo "🔑 Hugging Face authentication needed..."
-
-        # Try to get token from pass (password manager)
-        HF_TOKEN="{{ secret "api-keys/huggingface" "" }}"
-
-        if [ -n "$HF_TOKEN" ] && [ "$HF_TOKEN" != "" ]; then
-            echo "🔐 Logging in to Hugging Face with saved token..."
-            huggingface-cli login --token "$HF_TOKEN" --add-to-git-credential
-            echo "✅ Hugging Face authentication complete"
-        else
-            echo "⚠️  No Hugging Face token found in password store."
-            echo "Please save your token with: pass insert api-keys/huggingface"
-            echo "Or login manually: huggingface-cli login"
-        fi
+        echo "⚠️  Hugging Face CLI not authenticated. Run: hf auth login"
     fi
 fi
 
 #################
-# Weights & Biases Authentication
+# wandb
 #################
 if command -v wandb >/dev/null 2>&1; then
-    # Check if already logged in
     if wandb verify >/dev/null 2>&1; then
-        echo "✅ wandb is already authenticated"
+        echo "✅ wandb is authenticated"
     else
-        echo "🔑 wandb authentication needed..."
-
-        # Try to get API key from pass
-        WANDB_API_KEY="{{ secret "api-keys/wandb" "" }}"
-
-        if [ -n "$WANDB_API_KEY" ] && [ "$WANDB_API_KEY" != "" ]; then
-            echo "🔐 Logging in to wandb with saved API key..."
-            wandb login "$WANDB_API_KEY"
-            echo "✅ wandb authentication complete"
-        else
-            echo "⚠️  No wandb API key found in password store."
-            echo "Please save your API key with: pass insert api-keys/wandb"
-            echo "Or login manually: wandb login"
-        fi
+        echo "⚠️  wandb not authenticated. Run: wandb login"
     fi
 fi
 
 echo ""
-echo "✅ ML tools authentication configuration complete!"
-echo ""
-echo "📝 To save your tokens for automatic login:"
-echo "   pass insert api-keys/huggingface"
-echo "   pass insert api-keys/wandb"
+echo "📝 Authentication commands:"
+echo "   gh auth login                          # GitHub"
+echo "   hf auth login                          # Hugging Face"
+echo "   wandb login                            # Weights & Biases"
+echo "   export ANTHROPIC_API_KEY='your-key'   # Claude"
+echo "   export OPENAI_API_KEY='your-key'      # OpenAI/Codex"
 echo ""
 
 {{ end -}}
