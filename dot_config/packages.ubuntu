@@ -39,7 +39,6 @@ zoxide               # smart cd (Ubuntu 22.04+)
 neovim
 vim
 nano
-# helix - installed via PPA in run_once script
 
 # ===========================================
 # Programming Languages & Runtimes
@@ -174,7 +173,6 @@ tk-dev
 # - fnm (via curl installer)
 # - uv (via curl installer)
 # - eza (via custom repo)
-# - helix (via PPA: ppa:maveonair/helix-editor)
 # - lazygit (via GitHub release download)
 # - git-delta (via GitHub release download)
 # - chezmoi (via snap or curl installer)

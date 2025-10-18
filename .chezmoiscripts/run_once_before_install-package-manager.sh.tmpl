@@ -78,28 +78,6 @@ else
 fi
 
 #################
-# Add PPAs
-#################
-echo "📦 Adding required PPAs..."
-
-# Helix editor PPA
-if ! grep -q "maveonair/helix-editor" /etc/apt/sources.list.d/*.list 2>/dev/null; then
-    echo "Adding Helix editor PPA..."
-    sudo apt-add-repository ppa:maveonair/helix-editor -y
-fi
-
-sudo apt update
-
-#################
-# Install from PPAs
-#################
-echo "📦 Installing tools from PPAs..."
-
-if ! command -v helix >/dev/null 2>&1; then
-    sudo apt install helix -y
-fi
-
-#################
 # Essential tools (via curl installers)
 #################
 echo "🔧 Installing essential tools via curl installers..."
