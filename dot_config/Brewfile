@@ -1,114 +1,142 @@
+# macOS Brewfile - Cleaned for Python/ML Development
+
+# ===========================================
+# Core Development Tools
+# ===========================================
 brew "git"
-brew "asdf"
-brew "ast-grep"
-brew "aws-cdk"
-brew "aws-sam-cli"
-brew "awscli"
-brew "azure-cli"
-brew "bash-language-server"
-brew "bat"
-brew "biome"
-brew "black"
-brew "btop"
-brew "certbot"
-brew "cfn-lint"
-brew "chezmoi"
-brew "colima", restart_service: :changed
 brew "curl"
-brew "libtool"
-brew "php"
-brew "composer"
-brew "direnv"
-brew "docker"
-brew "docker-compose"
-brew "dockerfile-language-server"
-brew "duckdb"
-brew "eza"
-brew "fastfetch"
-brew "fd"
-brew "ffmpeg"
-brew "fio"
+brew "wget"
+brew "gnupg"
+brew "pass"
+brew "pinentry-mac"
+
+# ===========================================
+# Shell & Terminal
+# ===========================================
 brew "fish"
 brew "fish-lsp"
 brew "fisher"
-brew "fnm"
+brew "starship"
+brew "tmux"
+brew "zellij"
+
+# ===========================================
+# Modern CLI Tools
+# ===========================================
+brew "bat"
+brew "ripgrep"
+brew "fd"
 brew "fzf"
-brew "gemini-cli"
-brew "ghostscript"
-brew "git-delta"
-brew "glances"
-brew "gnupg"
-brew "go"
-brew "golines"
-brew "terminal-notifier"
-brew "gopass"
-brew "graphviz"
-brew "pkgconf"
-brew "helix"
-brew "helm"
-brew "htop"
-brew "httpie"
-brew "ifstat"
-brew "imagemagick"
-brew "imagesnap"
+brew "eza"
+brew "zoxide"
+brew "direnv"
 brew "jq"
-brew "julia"
-brew "kanata"
-brew "kind"
-brew "kubernetes-cli"
-brew "lazygit"
-brew "lolcat"
-brew "luarocks"
-brew "minikube"
-brew "mise"
+brew "tldr"
+brew "watch"
+
+# ===========================================
+# Editors
+# ===========================================
 brew "neovim"
-brew "neovide"
-brew "ninja"
-brew "nnn"
-brew "nvm"
-brew "ollama", restart_service: :changed
-brew "openjdk"
-brew "pass"
-brew "pinentry-mac"
-brew "plantuml"
-brew "poetry"
-brew "pre-commit"
-brew "prettier"
+brew "helix"
+brew "vim"
+
+# ===========================================
+# Git Tools
+# ===========================================
+brew "git-delta"
+brew "lazygit"
+
+# ===========================================
+# Python Development
+# ===========================================
 brew "pyenv"
 brew "pyenv-virtualenv"
-brew "pylyzer"
+brew "uv"
 brew "pyright"
 brew "python-lsp-server"
+brew "pylyzer"
+brew "black"
+brew "ruff"
+
+# ===========================================
+# Node.js Development
+# ===========================================
+brew "fnm"
+brew "typescript-language-server"
+brew "prettier"
+brew "biome"
+
+# ===========================================
+# Go Development
+# ===========================================
+brew "go"
+brew "golines"
+
+# ===========================================
+# Containers & Docker
+# ===========================================
+brew "colima", restart_service: :changed
+brew "docker"
+brew "docker-compose"
+brew "dockerfile-language-server"
+
+# ===========================================
+# AI & ML Tools
+# ===========================================
+brew "ollama", restart_service: :changed
 brew "pytorch"
-brew "rbenv"
+brew "gemini-cli"
+
+# ===========================================
+# System Monitoring & Performance
+# ===========================================
+brew "htop"
+brew "btop"
+brew "glances"
+brew "fastfetch"
+brew "terminal-notifier"
+
+# ===========================================
+# Network Tools
+# ===========================================
+brew "httpie"
+
+# ===========================================
+# LSP Servers & Language Tools
+# ===========================================
+brew "bash-language-server"
+brew "yaml-language-server"
+brew "vscode-langservers-extracted"
+brew "tree-sitter-cli"
+
+# ===========================================
+# Formatters & Linters
+# ===========================================
+brew "shfmt"
+brew "taplo"
+
+# ===========================================
+# File Tools
+# ===========================================
+brew "sevenzip"
 brew "rclone"
 brew "rdiff-backup"
-brew "ripgrep"
-brew "ruff"
-brew "sevenzip"
-brew "shfmt"
-brew "showkey"
-brew "sql-formatter"
-brew "sql-language-server"
-brew "sqlfmt"
-brew "starship"
-brew "structurizr-cli"
-brew "switchaudio-osx"
-brew "taplo"
-brew "tectonic"
-brew "terraform-ls"
-brew "tfsec"
-brew "tldr"
-brew "tmux"
-brew "tree-sitter-cli"
-brew "typescript-language-server"
-brew "uv"
-brew "vim"
-brew "vscode-langservers-extracted"
-brew "wakeonlan"
-brew "watch"
-brew "wget"
-brew "yaml-language-server"
 brew "yazi"
-brew "zellij"
-brew "zoxide"
+
+# ===========================================
+# Build Tools
+# ===========================================
+brew "chezmoi"
+brew "pre-commit"
+brew "ninja"
+brew "pkgconf"
+brew "libtool"
+
+# ===========================================
+# Misc Utilities
+# ===========================================
+brew "imagemagick"
+brew "ffmpeg"
+brew "ghostscript"
+brew "tectonic"
