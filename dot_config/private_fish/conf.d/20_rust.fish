@@ -2,7 +2,7 @@ if type -q rustup
     if test -d "$HOME/.rustup/bin"
         fish_add_path "$HOME/.rustup/bin"
     else
-        fish_add_path "$(dirname $(rustup which rustc))"
+        fish_add_path (dirname (rustup which rustc))
     end
 end
 

@@ -1,5 +1,5 @@
 if type -q fnm
-    eval "$(fnm env)"
+    fnm env | source
 else
     echo "fnm (Fast Node Manager) was not installed"
 end
