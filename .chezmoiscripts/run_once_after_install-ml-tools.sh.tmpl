@@ -49,25 +49,52 @@ else
 fi
 
 #################
-# Anthropic CLI (Claude)
+# Ensure Node.js is installed (required for npm packages)
 #################
-if ! command -v anthropic >/dev/null 2>&1; then
-    echo "📦 Installing Anthropic CLI..."
-    uv tool install anthropic-cli
-    echo "✅ Anthropic CLI installed"
-else
-    echo "✅ Anthropic CLI is already installed"
+if ! command -v node >/dev/null 2>&1; then
+    # First, install fnm if not present
+    if ! command -v fnm >/dev/null 2>&1; then
+        echo "📦 Installing fnm (Fast Node Manager)..."
+        curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
+        # Add fnm to PATH for this session
+        export PATH="$HOME/.local/share/fnm:$PATH"
+        eval "$(fnm env --use-on-cd)"
+    fi
+
+    # Now install Node.js via fnm
+    if command -v fnm >/dev/null 2>&1; then
+        echo "📦 Installing Node.js LTS via fnm..."
+        fnm install --lts
+        fnm use lts-latest
+        # Ensure node is in PATH
+        eval "$(fnm env)"
+        echo "✅ Node.js installed via fnm"
+    else
+        echo "⚠️  fnm installation failed. Installing Node.js via apt..."
+        sudo apt install -y nodejs npm
+    fi
 fi
 
 #################
-# OpenAI CLI
+# Claude Code (via npm)
 #################
-if ! command -v openai >/dev/null 2>&1; then
-    echo "📦 Installing OpenAI CLI..."
-    uv tool install openai-cli
-    echo "✅ OpenAI CLI installed"
+if ! command -v claude >/dev/null 2>&1; then
+    echo "📦 Installing Claude Code..."
+    npm install -g @anthropic-ai/claude-code
+    echo "✅ Claude Code installed"
 else
-    echo "✅ OpenAI CLI is already installed"
+    echo "✅ Claude Code is already installed"
+fi
+
+#################
+# OpenAI Codex (via npm)
+#################
+if ! command -v codex >/dev/null 2>&1; then
+    echo "📦 Installing OpenAI Codex..."
+    npm install -g @openai/codex
+    echo "✅ OpenAI Codex installed"
+else
+    echo "✅ OpenAI Codex is already installed"
 fi
 
 #################
@@ -81,9 +108,13 @@ echo "  gh auth login                             # GitHub"
 echo "  hf auth login                             # Hugging Face"
 echo "  wandb login                               # Weights & Biases"
 echo ""
-echo "Set environment variables for API access:"
-echo "  export ANTHROPIC_API_KEY='your-key'      # Anthropic CLI"
-echo "  export OPENAI_API_KEY='your-key'         # OpenAI CLI"
+echo "Set environment variables for AI tools:"
+echo "  export ANTHROPIC_API_KEY='your-key'      # Claude Code"
+echo "  export OPENAI_API_KEY='your-key'         # OpenAI Codex"
+echo ""
+echo "Usage:"
+echo "  claude                                    # Start Claude Code"
+echo "  codex                                     # Start OpenAI Codex"
 echo ""
 
 {{ else if eq .chezmoi.os "darwin" -}}
@@ -117,20 +148,26 @@ else
     echo "✅ wandb is already installed"
 fi
 
-# Anthropic CLI (Claude)
-if ! command -v anthropic >/dev/null 2>&1; then
-    echo "📦 Installing Anthropic CLI..."
-    uv tool install anthropic-cli
-else
-    echo "✅ Anthropic CLI is already installed"
+# Ensure Node.js is installed (required for npm packages)
+if ! command -v node >/dev/null 2>&1; then
+    echo "📦 Installing Node.js..."
+    brew install node
 fi
 
-# OpenAI CLI
-if ! command -v openai >/dev/null 2>&1; then
-    echo "📦 Installing OpenAI CLI..."
-    uv tool install openai-cli
+# Claude Code (via npm)
+if ! command -v claude >/dev/null 2>&1; then
+    echo "📦 Installing Claude Code..."
+    npm install -g @anthropic-ai/claude-code
 else
-    echo "✅ OpenAI CLI is already installed"
+    echo "✅ Claude Code is already installed"
+fi
+
+# OpenAI Codex (via npm)
+if ! command -v codex >/dev/null 2>&1; then
+    echo "📦 Installing OpenAI Codex..."
+    npm install -g @openai/codex
+else
+    echo "✅ OpenAI Codex is already installed"
 fi
 
 echo ""
