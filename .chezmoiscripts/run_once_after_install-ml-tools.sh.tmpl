@@ -49,18 +49,18 @@ else
 fi
 
 #################
-# Claude Code CLI (via uv tool)
+# Anthropic CLI (Claude)
 #################
-if ! command -v claude-code >/dev/null 2>&1; then
-    echo "📦 Installing Claude Code CLI..."
-    uv tool install claude-code
-    echo "✅ Claude Code CLI installed"
+if ! command -v anthropic >/dev/null 2>&1; then
+    echo "📦 Installing Anthropic CLI..."
+    uv tool install anthropic-cli
+    echo "✅ Anthropic CLI installed"
 else
-    echo "✅ Claude Code CLI is already installed"
+    echo "✅ Anthropic CLI is already installed"
 fi
 
 #################
-# OpenAI CLI (for Codex access)
+# OpenAI CLI
 #################
 if ! command -v openai >/dev/null 2>&1; then
     echo "📦 Installing OpenAI CLI..."
@@ -76,23 +76,14 @@ fi
 echo ""
 echo "🔐 Authentication Setup"
 echo "======================="
+echo "Run these commands to authenticate:"
+echo "  gh auth login                             # GitHub"
+echo "  hf auth login                             # Hugging Face"
+echo "  wandb login                               # Weights & Biases"
 echo ""
-echo "To complete the setup, run these commands:"
-echo ""
-echo "1. Login to GitHub:"
-echo "   gh auth login"
-echo ""
-echo "2. Login to Hugging Face (get token from https://huggingface.co/settings/tokens):"
-echo "   hf auth login"
-echo ""
-echo "3. Login to Weights & Biases (get API key from https://wandb.ai/authorize):"
-echo "   wandb login"
-echo ""
-echo "4. Set up Claude Code (get API key from https://console.anthropic.com/):"
-echo "   export ANTHROPIC_API_KEY='your-api-key'"
-echo ""
-echo "5. Set up OpenAI CLI (get API key from https://platform.openai.com/api-keys):"
-echo "   export OPENAI_API_KEY='your-api-key'"
+echo "Set environment variables for API access:"
+echo "  export ANTHROPIC_API_KEY='your-key'      # Anthropic CLI"
+echo "  export OPENAI_API_KEY='your-key'         # OpenAI CLI"
 echo ""
 
 {{ else if eq .chezmoi.os "darwin" -}}
@@ -126,15 +117,15 @@ else
     echo "✅ wandb is already installed"
 fi
 
-# Claude Code CLI (via uv tool)
-if ! command -v claude-code >/dev/null 2>&1; then
-    echo "📦 Installing Claude Code CLI..."
-    uv tool install claude-code
+# Anthropic CLI (Claude)
+if ! command -v anthropic >/dev/null 2>&1; then
+    echo "📦 Installing Anthropic CLI..."
+    uv tool install anthropic-cli
 else
-    echo "✅ Claude Code CLI is already installed"
+    echo "✅ Anthropic CLI is already installed"
 fi
 
-# OpenAI CLI (via uv tool)
+# OpenAI CLI
 if ! command -v openai >/dev/null 2>&1; then
     echo "📦 Installing OpenAI CLI..."
     uv tool install openai-cli
@@ -146,11 +137,13 @@ echo ""
 echo "🔐 Authentication Setup"
 echo "======================="
 echo "Run these commands to authenticate:"
-echo "  gh auth login"
-echo "  hf auth login"
-echo "  wandb login"
-echo "  export ANTHROPIC_API_KEY='your-api-key'  # Claude"
-echo "  export OPENAI_API_KEY='your-api-key'     # OpenAI/Codex"
+echo "  gh auth login                             # GitHub"
+echo "  hf auth login                             # Hugging Face"
+echo "  wandb login                               # Weights & Biases"
+echo ""
+echo "Set environment variables for API access:"
+echo "  export ANTHROPIC_API_KEY='your-key'      # Anthropic CLI"
+echo "  export OPENAI_API_KEY='your-key'         # OpenAI CLI"
 echo ""
 
 {{ end -}}

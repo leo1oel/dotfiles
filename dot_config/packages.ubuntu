@@ -25,11 +25,11 @@ tmux
 # ===========================================
 # Modern CLI Tools (Rust-based alternatives)
 # ===========================================
-ripgrep              # rg - better grep
-bat                  # better cat (command is 'batcat' on Ubuntu)
-fd-find              # fd - better find (command is 'fdfind' on Ubuntu)
-fzf                  # fuzzy finder
-zoxide               # smart cd (Ubuntu 22.04+)
+ripgrep
+bat
+fd-find
+fzf
+zoxide
 # eza - better ls (requires custom repo, installed in run_once script)
 # zellij - terminal multiplexer (not in apt, will be installed via cargo/download)
 
@@ -69,7 +69,6 @@ docker-buildx
 # ===========================================
 direnv
 jq
-yq
 tree
 htop
 btop
@@ -108,8 +107,8 @@ tig
 # ===========================================
 # LSP Servers & Language Tools (available via apt)
 # ===========================================
-bash-language-server
-yaml-language-server
+# bash-language-server - not in Ubuntu 22.04 repos, install via npm
+# yaml-language-server - not in Ubuntu 22.04 repos, install via npm
 # typescript-language-server - install via npm
 # python LSPs - install via pip (pyright, python-lsp-server)
 # rust-analyzer - not needed (no Rust dev)
