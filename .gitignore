@@ -21,9 +21,7 @@ Thumbs.db
 .*.swp
 
 # Chezmoi Runtime Files
-# Note: Source files are tracked, but not the applied dotfiles
-.chezmoitemplates/
-.chezmoiscripts/
+# Note: .chezmoiscripts/ should be tracked as they contain installation logic
 
 # Environment Files
 .env
