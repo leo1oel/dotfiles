@@ -88,12 +88,6 @@ if ! grep -q "maveonair/helix-editor" /etc/apt/sources.list.d/*.list 2>/dev/null
     sudo apt-add-repository ppa:maveonair/helix-editor -y
 fi
 
-# LazyGit PPA
-if ! grep -q "lazygit-team" /etc/apt/sources.list.d/*.list 2>/dev/null; then
-    echo "Adding LazyGit PPA..."
-    sudo apt-add-repository ppa:lazygit-team/daily -y
-fi
-
 sudo apt update
 
 #################
@@ -103,10 +97,6 @@ echo "📦 Installing tools from PPAs..."
 
 if ! command -v helix >/dev/null 2>&1; then
     sudo apt install helix -y
-fi
-
-if ! command -v lazygit >/dev/null 2>&1; then
-    sudo apt install lazygit -y
 fi
 
 #################
@@ -154,6 +144,19 @@ if ! command -v delta >/dev/null 2>&1; then
     wget "https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/git-delta_${DELTA_VERSION}_amd64.deb" -O /tmp/git-delta.deb
     sudo dpkg -i /tmp/git-delta.deb
     rm /tmp/git-delta.deb
+fi
+
+#################
+# lazygit (git TUI)
+#################
+if ! command -v lazygit >/dev/null 2>&1; then
+    echo "📦 Installing lazygit..."
+    LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+    wget "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" -O /tmp/lazygit.tar.gz
+    tar -xzf /tmp/lazygit.tar.gz -C /tmp
+    sudo mv /tmp/lazygit /usr/local/bin/
+    sudo chmod +x /usr/local/bin/lazygit
+    rm /tmp/lazygit.tar.gz
 fi
 
 #################
