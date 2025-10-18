@@ -1,4 +1,3 @@
-tap "homebrew/command-not-found"
 tap "nikitabobko/tap"
 brew "git"
 brew "asdf"
