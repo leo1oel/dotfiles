@@ -53,27 +53,41 @@ fi
 #################
 # Install fnm if not present
 if ! command -v fnm >/dev/null 2>&1; then
-    echo "📦 Installing fnm (Fast Node Manager) from GitHub..."
-    # Download fnm binary directly from GitHub (more reliable)
-    FNM_VERSION="v1.37.2"
-    FNM_URL="https://github.com/Schniz/fnm/releases/download/${FNM_VERSION}/fnm-linux.zip"
+    echo "📦 Installing fnm (Fast Node Manager)..."
 
-    mkdir -p "$HOME/.local/share/fnm"
-    if curl -fsSL -o /tmp/fnm.zip "$FNM_URL" && \
-       unzip -o /tmp/fnm.zip -d /tmp && \
-       mv /tmp/fnm "$HOME/.local/share/fnm/" && \
-       chmod +x "$HOME/.local/share/fnm/fnm" && \
-       rm -f /tmp/fnm.zip; then
+    # Try curl installer first
+    FNM_INSTALLED=false
+    if curl -fsSL --connect-timeout 10 --max-time 30 https://fnm.vercel.app/install | bash -s -- --skip-shell 2>&1; then
         export PATH="$HOME/.local/share/fnm:$PATH"
         if command -v fnm >/dev/null 2>&1; then
-            echo "✅ fnm installed from GitHub release"
+            echo "✅ fnm installed via curl"
+            FNM_INSTALLED=true
+        fi
+    fi
+
+    # If curl failed, use GitHub as fallback
+    if [ "$FNM_INSTALLED" = false ]; then
+        echo "⚠️  curl installation failed. Using GitHub release..."
+        FNM_VERSION="v1.37.2"
+        FNM_URL="https://github.com/Schniz/fnm/releases/download/${FNM_VERSION}/fnm-linux.zip"
+
+        mkdir -p "$HOME/.local/share/fnm"
+        if curl -fsSL -o /tmp/fnm.zip "$FNM_URL" && \
+           unzip -o /tmp/fnm.zip -d /tmp && \
+           mv /tmp/fnm "$HOME/.local/share/fnm/" && \
+           chmod +x "$HOME/.local/share/fnm/fnm" && \
+           rm -f /tmp/fnm.zip; then
+            export PATH="$HOME/.local/share/fnm:$PATH"
+            if command -v fnm >/dev/null 2>&1; then
+                echo "✅ fnm installed from GitHub release"
+            else
+                echo "❌ fnm installation failed."
+                exit 1
+            fi
         else
-            echo "❌ fnm installation failed."
+            echo "❌ Failed to download fnm from GitHub."
             exit 1
         fi
-    else
-        echo "❌ Failed to download fnm from GitHub."
-        exit 1
     fi
 fi
 
@@ -142,14 +156,6 @@ echo "  gh auth login                             # GitHub"
 echo "  hf auth login                             # Hugging Face"
 echo "  wandb login                               # Weights & Biases"
 echo ""
-echo "Set environment variables for AI tools:"
-echo "  export ANTHROPIC_API_KEY='your-key'      # Claude Code"
-echo "  export OPENAI_API_KEY='your-key'         # OpenAI Codex"
-echo ""
-echo "Usage:"
-echo "  claude                                    # Start Claude Code"
-echo "  codex                                     # Start OpenAI Codex"
-echo ""
 
 {{ else if eq .chezmoi.os "darwin" -}}
 #################
@@ -211,10 +217,6 @@ echo "Run these commands to authenticate:"
 echo "  gh auth login                             # GitHub"
 echo "  hf auth login                             # Hugging Face"
 echo "  wandb login                               # Weights & Biases"
-echo ""
-echo "Set environment variables for API access:"
-echo "  export ANTHROPIC_API_KEY='your-key'      # Anthropic CLI"
-echo "  export OPENAI_API_KEY='your-key'         # OpenAI CLI"
 echo ""
 
 {{ end -}}
