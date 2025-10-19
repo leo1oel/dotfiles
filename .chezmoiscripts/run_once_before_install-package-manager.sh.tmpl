@@ -327,6 +327,21 @@ if ! command -v zoxide >/dev/null 2>&1; then
 fi
 
 #################
+# fastfetch (system info)
+#################
+if ! command -v fastfetch >/dev/null 2>&1; then
+    echo "📦 Installing fastfetch..."
+    mkdir -p "$HOME/.local/bin"
+    wget "https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-amd64.tar.gz" -O /tmp/fastfetch.tar.gz 2>/dev/null
+    tar -xzf /tmp/fastfetch.tar.gz -C /tmp
+    # Extract binary from nested path: fastfetch-linux-amd64/usr/bin/fastfetch
+    find /tmp/fastfetch-linux-amd64 -name "fastfetch" -type f -executable -exec mv {} "$HOME/.local/bin/" \;
+    chmod +x "$HOME/.local/bin/fastfetch"
+    rm -rf /tmp/fastfetch.tar.gz /tmp/fastfetch-linux-amd64
+    echo "✅ fastfetch installed to ~/.local/bin"
+fi
+
+#################
 # zellij (terminal multiplexer)
 #################
 if ! command -v zellij >/dev/null 2>&1; then
