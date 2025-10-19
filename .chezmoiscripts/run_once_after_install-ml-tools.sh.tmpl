@@ -56,57 +56,57 @@ if ! command -v fnm >/dev/null 2>&1; then
     echo "📦 Installing fnm (Fast Node Manager)..."
 
     # Try installing via curl (with retry)
-    FNM_INSTALLED=false
     for i in 1 2 3; do
-        if curl -fsSL --connect-timeout 10 --max-time 30 https://fnm.vercel.app/install | bash -s -- --skip-shell; then
-            FNM_INSTALLED=true
-            break
-        else
+        echo "🔄 Attempt $i/3..."
+        if curl -fsSL --connect-timeout 10 --max-time 30 https://fnm.vercel.app/install | bash -s -- --skip-shell 2>&1; then
+            export PATH="$HOME/.local/share/fnm:$PATH"
+            # Verify fnm is actually available
+            if command -v fnm >/dev/null 2>&1; then
+                echo "✅ fnm installed via curl"
+                break
+            fi
+        fi
+        if [ $i -lt 3 ]; then
             echo "⚠️  Attempt $i failed, retrying..."
             sleep 2
         fi
     done
 
-    if [ "$FNM_INSTALLED" = true ]; then
-        export PATH="$HOME/.local/share/fnm:$PATH"
-        echo "✅ fnm installed"
-    else
-        echo "⚠️  fnm installation via curl failed. Trying GitHub release..."
+    # If still not available, try GitHub fallback
+    if ! command -v fnm >/dev/null 2>&1; then
+        echo "⚠️  curl installation failed. Trying GitHub release..."
         # Fallback: Download fnm binary directly from GitHub
         FNM_VERSION="v1.37.2"
         FNM_URL="https://github.com/Schniz/fnm/releases/download/${FNM_VERSION}/fnm-linux.zip"
 
         mkdir -p "$HOME/.local/share/fnm"
-        cd /tmp
-        curl -fsSL -o fnm.zip "$FNM_URL" && \
-        unzip -o fnm.zip && \
-        mv fnm "$HOME/.local/share/fnm/" && \
-        chmod +x "$HOME/.local/share/fnm/fnm" && \
-        rm -f fnm.zip
-
-        export PATH="$HOME/.local/share/fnm:$PATH"
-
-        if command -v fnm >/dev/null 2>&1; then
-            echo "✅ fnm installed from GitHub release"
-        else
-            echo "❌ fnm installation failed completely."
-            exit 1
+        if curl -fsSL -o /tmp/fnm.zip "$FNM_URL" && \
+           unzip -o /tmp/fnm.zip -d /tmp && \
+           mv /tmp/fnm "$HOME/.local/share/fnm/" && \
+           chmod +x "$HOME/.local/share/fnm/fnm" && \
+           rm -f /tmp/fnm.zip; then
+            export PATH="$HOME/.local/share/fnm:$PATH"
+            if command -v fnm >/dev/null 2>&1; then
+                echo "✅ fnm installed from GitHub release"
+            fi
         fi
+    fi
+
+    # Final check
+    if ! command -v fnm >/dev/null 2>&1; then
+        echo "❌ fnm installation failed completely."
+        echo "   Please install manually: https://github.com/Schniz/fnm"
+        exit 1
     fi
 fi
 
 # Always ensure we have Node.js LTS via fnm
-if command -v fnm >/dev/null 2>&1; then
-    echo "📦 Installing Node.js LTS via fnm..."
-    eval "$(fnm env --use-on-cd)"
-    fnm install --lts
-    fnm default lts-latest
-    eval "$(fnm env)"
-    echo "✅ Node.js $(node -v) ready"
-else
-    echo "❌ fnm not available. Cannot install Node.js."
-    exit 1
-fi
+echo "📦 Installing Node.js LTS via fnm..."
+eval "$(fnm env --use-on-cd)" 2>/dev/null || true
+fnm install --lts
+fnm default lts-latest
+eval "$(fnm env)" 2>/dev/null || true
+echo "✅ Node.js $(node -v) ready"
 
 #################
 # Claude Code (via npm)
