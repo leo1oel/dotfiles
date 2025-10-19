@@ -86,54 +86,55 @@ else
     else
         # Try to install Fish to ~/.local without sudo
         echo "🚀 Attempting to install Fish shell to ~/.local (no sudo)..."
-        mkdir -p "$HOME/.local/bin"
+        mkdir -p "$HOME/.local"
 
-        # Try downloading precompiled Fish binary
-        FISH_VERSION="3.7.1"
-        FISH_URL="https://github.com/fish-shell/fish-shell/releases/download/${FISH_VERSION}/fish-${FISH_VERSION}.tar.xz"
+        # Download precompiled .deb package and extract it
+        # Using Ubuntu 22.04 (jammy) package as it's widely compatible
+        FISH_DEB_URL="http://ppa.launchpad.net/fish-shell/release-3/ubuntu/pool/main/f/fish/fish_3.7.1-1~jammy_amd64.deb"
 
-        if command -v wget >/dev/null 2>&1 || command -v curl >/dev/null 2>&1; then
-            # Download and extract
-            cd /tmp
-            if command -v wget >/dev/null 2>&1; then
-                wget -q "$FISH_URL" -O fish.tar.xz 2>/dev/null || true
-            else
-                curl -sL "$FISH_URL" -o fish.tar.xz 2>/dev/null || true
-            fi
+        cd /tmp
+        FISH_INSTALLED=false
 
-            if [ -f fish.tar.xz ]; then
-                tar -xf fish.tar.xz
-                cd "fish-${FISH_VERSION}"
-
-                # Build and install to ~/.local
-                if command -v cmake >/dev/null 2>&1 && command -v make >/dev/null 2>&1; then
-                    cmake -DCMAKE_INSTALL_PREFIX="$HOME/.local" . >/dev/null 2>&1 && \
-                    make >/dev/null 2>&1 && \
-                    make install >/dev/null 2>&1
-
-                    if [ -x "$HOME/.local/bin/fish" ]; then
-                        FISH_PATH="$HOME/.local/bin/fish"
-                        echo "✅ Fish installed to ~/.local/bin"
-                    else
-                        echo "⚠️  Fish build failed. Using default shell."
-                        FISH_PATH=""
-                    fi
-                else
-                    echo "⚠️  Build tools (cmake/make) not available."
-                    echo "   Ask admin to install Fish: sudo apt install fish"
-                    FISH_PATH=""
-                fi
-
-                # Cleanup
-                cd /tmp
-                rm -rf fish.tar.xz "fish-${FISH_VERSION}"
-            else
-                echo "⚠️  Could not download Fish. Using default shell."
-                FISH_PATH=""
-            fi
+        # Download .deb package
+        echo "📦 Downloading Fish package..."
+        if command -v wget >/dev/null 2>&1; then
+            wget -q "$FISH_DEB_URL" -O fish.deb 2>/dev/null && DOWNLOAD_OK=true || DOWNLOAD_OK=false
+        elif command -v curl >/dev/null 2>&1; then
+            curl -sL "$FISH_DEB_URL" -o fish.deb 2>/dev/null && DOWNLOAD_OK=true || DOWNLOAD_OK=false
         else
-            echo "⚠️  wget or curl not available. Cannot install Fish."
-            echo "   Ask admin to install: sudo apt install fish"
+            echo "⚠️  wget or curl not available. Cannot download Fish."
+            DOWNLOAD_OK=false
+        fi
+
+        if [ "$DOWNLOAD_OK" = true ] && [ -f fish.deb ]; then
+            echo "📦 Extracting Fish to ~/.local..."
+
+            # Extract .deb package (doesn't require sudo)
+            if command -v ar >/dev/null 2>&1; then
+                # Method 1: Use ar to extract (most compatible)
+                ar x fish.deb data.tar.xz 2>/dev/null || ar x fish.deb data.tar.gz 2>/dev/null
+
+                if [ -f data.tar.xz ]; then
+                    tar -xf data.tar.xz -C "$HOME/.local" --strip-components=1 2>/dev/null && FISH_INSTALLED=true
+                elif [ -f data.tar.gz ]; then
+                    tar -xf data.tar.gz -C "$HOME/.local" --strip-components=1 2>/dev/null && FISH_INSTALLED=true
+                fi
+            elif command -v dpkg-deb >/dev/null 2>&1; then
+                # Method 2: Use dpkg-deb (cleaner but may not be available)
+                dpkg-deb -x fish.deb "$HOME/.local" 2>/dev/null && FISH_INSTALLED=true
+            fi
+
+            # Cleanup
+            rm -f fish.deb data.tar.xz data.tar.gz
+        fi
+
+        if [ "$FISH_INSTALLED" = true ] && [ -x "$HOME/.local/bin/fish" ]; then
+            FISH_PATH="$HOME/.local/bin/fish"
+            echo "✅ Fish installed to ~/.local/bin"
+        else
+            echo "⚠️  Could not install Fish without sudo."
+            echo "   Please ask your system administrator to run:"
+            echo "   sudo apt install fish"
             FISH_PATH=""
         fi
     fi
