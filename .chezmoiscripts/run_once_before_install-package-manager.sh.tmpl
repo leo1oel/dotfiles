@@ -125,13 +125,22 @@ echo "🔧 Installing essential tools via curl installers..."
 # Starship prompt
 if ! command -v starship >/dev/null 2>&1; then
     echo "🚀 Installing Starship prompt..."
-    curl -sS https://starship.rs/install.sh | sh -s -- -y
+    mkdir -p "$HOME/.local/bin"
+    if [ "$HAS_SUDO" = true ]; then
+        # Install to /usr/local/bin with sudo
+        curl -sS https://starship.rs/install.sh | sh -s -- -y
+    else
+        # Install to ~/.local/bin without sudo
+        curl -sS https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin"
+    fi
+    echo "✅ Starship installed"
 fi
 
 # uv (Python package manager)
 if ! command -v uv >/dev/null 2>&1; then
     echo "📦 Installing uv..."
     curl -LsSf https://astral.sh/uv/install.sh | sh
+    echo "✅ uv installed"
 fi
 
 #################
