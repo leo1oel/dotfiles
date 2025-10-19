@@ -46,44 +46,75 @@ fi
 
 echo "🐧 Setting up Linux environment..."
 
-# Update package lists
-echo "📦 Updating package lists..."
-sudo apt update
+# Check if we have sudo privileges
+HAS_SUDO=false
+if sudo -n true 2>/dev/null; then
+    HAS_SUDO=true
+    echo "✅ Running with sudo privileges"
+else
+    echo "ℹ️  Running without sudo (user-space installation)"
+fi
+
+# Update package lists (only if we have sudo)
+if [ "$HAS_SUDO" = true ]; then
+    echo "📦 Updating package lists..."
+    sudo apt update
+fi
 
 #################
 # Install required packages for PPA management
 #################
-echo "📦 Installing software-properties-common..."
-sudo apt install -y software-properties-common
+if [ "$HAS_SUDO" = true ]; then
+    echo "📦 Installing software-properties-common..."
+    sudo apt install -y software-properties-common
+fi
 
 #################
 # Fish Shell
 #################
 if command -v fish >/dev/null 2>&1; then
     echo "✅ Fish shell is already installed at $(command -v fish)"
+    FISH_PATH=$(which fish)
 else
-    echo "🚀 Installing Fish shell..."
-    # Add Fish shell PPA for latest version
-    sudo apt-add-repository ppa:fish-shell/release-3 -y
-    sudo apt update
-    sudo apt install fish -y
-    echo "✅ Fish shell installation complete."
+    if [ "$HAS_SUDO" = true ]; then
+        echo "🚀 Installing Fish shell via PPA..."
+        sudo apt-add-repository ppa:fish-shell/release-3 -y
+        sudo apt update
+        sudo apt install fish -y
+        FISH_PATH=$(which fish)
+        echo "✅ Fish shell installation complete."
+    else
+        echo "⚠️  Cannot install Fish shell without sudo."
+        echo "   Fish may already be installed by system admin, or you can:"
+        echo "   - Ask admin to install: sudo apt install fish"
+        echo "   - Use existing shell"
+        FISH_PATH=""
+    fi
 fi
 
-# Set Fish as default shell (runs whether Fish was just installed or already existed)
-echo "🐚 Setting Fish as default shell..."
-FISH_PATH=$(which fish)
-if ! grep -q "$FISH_PATH" /etc/shells; then
-    echo "$FISH_PATH" | sudo tee -a /etc/shells
-fi
+# Set Fish as default shell (only if Fish is available)
+if [ -n "$FISH_PATH" ] && [ -x "$FISH_PATH" ]; then
+    echo "🐚 Setting Fish as default shell..."
 
-# Check current default shell
-CURRENT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
-if [ "$CURRENT_SHELL" != "$FISH_PATH" ]; then
-    chsh -s "$FISH_PATH"
-    echo "✅ Fish set as default shell. Please logout and login again for this to take effect."
-else
-    echo "✅ Fish is already the default shell."
+    # Add to /etc/shells if we have sudo
+    if [ "$HAS_SUDO" = true ]; then
+        if ! grep -q "$FISH_PATH" /etc/shells 2>/dev/null; then
+            echo "$FISH_PATH" | sudo tee -a /etc/shells
+        fi
+    fi
+
+    # Check current default shell
+    CURRENT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
+    if [ "$CURRENT_SHELL" != "$FISH_PATH" ]; then
+        if chsh -s "$FISH_PATH" 2>/dev/null; then
+            echo "✅ Fish set as default shell. Please logout and login again for this to take effect."
+        else
+            echo "ℹ️  Could not set Fish as default shell (may need admin approval)"
+            echo "   Ask admin to run: sudo chsh -s $FISH_PATH $USER"
+        fi
+    else
+        echo "✅ Fish is already the default shell."
+    fi
 fi
 
 #################
@@ -108,11 +139,11 @@ fi
 #################
 if ! command -v eza >/dev/null 2>&1; then
     echo "📦 Installing eza..."
+    mkdir -p "$HOME/.local/bin"
     wget -c https://github.com/eza-community/eza/releases/latest/download/eza_x86_64-unknown-linux-gnu.tar.gz -O - | tar xz
-    sudo chmod +x eza
-    sudo chown root:root eza
-    sudo mv eza /usr/local/bin/eza
-    echo "✅ eza installed"
+    chmod +x eza
+    mv eza "$HOME/.local/bin/eza"
+    echo "✅ eza installed to ~/.local/bin"
 fi
 
 #################
@@ -120,10 +151,14 @@ fi
 #################
 if ! command -v delta >/dev/null 2>&1; then
     echo "📦 Installing git-delta..."
+    mkdir -p "$HOME/.local/bin"
     DELTA_VERSION=$(curl -s https://api.github.com/repos/dandavison/delta/releases/latest | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
-    wget "https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/git-delta_${DELTA_VERSION}_amd64.deb" -O /tmp/git-delta.deb
-    sudo dpkg -i /tmp/git-delta.deb
-    rm /tmp/git-delta.deb
+    wget "https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu.tar.gz" -O /tmp/delta.tar.gz
+    tar -xzf /tmp/delta.tar.gz -C /tmp
+    mv "/tmp/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu/delta" "$HOME/.local/bin/"
+    chmod +x "$HOME/.local/bin/delta"
+    rm -rf /tmp/delta.tar.gz "/tmp/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu"
+    echo "✅ git-delta installed to ~/.local/bin"
 fi
 
 #################
@@ -131,12 +166,14 @@ fi
 #################
 if ! command -v lazygit >/dev/null 2>&1; then
     echo "📦 Installing lazygit..."
+    mkdir -p "$HOME/.local/bin"
     LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
     wget "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" -O /tmp/lazygit.tar.gz
     tar -xzf /tmp/lazygit.tar.gz -C /tmp
-    sudo mv /tmp/lazygit /usr/local/bin/
-    sudo chmod +x /usr/local/bin/lazygit
+    mv /tmp/lazygit "$HOME/.local/bin/"
+    chmod +x "$HOME/.local/bin/lazygit"
     rm /tmp/lazygit.tar.gz
+    echo "✅ lazygit installed to ~/.local/bin"
 fi
 
 #################
@@ -144,13 +181,14 @@ fi
 #################
 if ! command -v zellij >/dev/null 2>&1; then
     echo "📦 Installing zellij..."
-    # Install via direct download
+    mkdir -p "$HOME/.local/bin"
     ZELLIJ_VERSION=$(curl -s https://api.github.com/repos/zellij-org/zellij/releases/latest | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
     wget "https://github.com/zellij-org/zellij/releases/download/${ZELLIJ_VERSION}/zellij-x86_64-unknown-linux-musl.tar.gz" -O /tmp/zellij.tar.gz
     tar -xzf /tmp/zellij.tar.gz -C /tmp
-    sudo mv /tmp/zellij /usr/local/bin/
-    sudo chmod +x /usr/local/bin/zellij
+    mv /tmp/zellij "$HOME/.local/bin/"
+    chmod +x "$HOME/.local/bin/zellij"
     rm /tmp/zellij.tar.gz
+    echo "✅ zellij installed to ~/.local/bin"
 fi
 
 #################

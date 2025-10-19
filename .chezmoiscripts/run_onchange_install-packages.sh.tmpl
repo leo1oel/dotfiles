@@ -21,23 +21,34 @@ fi
 
 if command -v apt >/dev/null 2>&1; then
   if [ -f "$HOME/.config/packages.ubuntu" ]; then
-    echo "📦 Updating Ubuntu packages via APT..."
-
-    # Update package lists
-    sudo apt update
-
-    # Read package list and install
-    # Filter out comments and empty lines
-    packages=$(grep -v '^#' "$HOME/.config/packages.ubuntu" | grep -v '^$' | tr '\n' ' ')
-
-    if [ -n "$packages" ]; then
-      echo "Installing packages: $packages"
-      sudo apt install -y $packages
-    else
-      echo "⚠️  No packages found in packages.ubuntu"
+    # Check if we have sudo privileges
+    HAS_SUDO=false
+    if sudo -n true 2>/dev/null; then
+        HAS_SUDO=true
     fi
 
-    echo "✅ Package installation complete."
+    if [ "$HAS_SUDO" = true ]; then
+      echo "📦 Updating Ubuntu packages via APT..."
+
+      # Update package lists
+      sudo apt update
+
+      # Read package list and install
+      # Filter out comments and empty lines
+      packages=$(grep -v '^#' "$HOME/.config/packages.ubuntu" | grep -v '^$' | tr '\n' ' ')
+
+      if [ -n "$packages" ]; then
+        echo "Installing packages: $packages"
+        sudo apt install -y $packages
+      else
+        echo "⚠️  No packages found in packages.ubuntu"
+      fi
+
+      echo "✅ Package installation complete."
+    else
+      echo "ℹ️  Skipping system package installation (no sudo privileges)"
+      echo "   Packages should already be installed by system admin."
+    fi
   else
     echo "⚠️  packages.ubuntu not found at ~/.config/packages.ubuntu, skipping package installation"
     echo "   This is normal on first run. Run 'chezmoi apply' again after completion."

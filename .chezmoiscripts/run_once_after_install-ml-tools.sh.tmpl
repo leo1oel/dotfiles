@@ -9,19 +9,36 @@ set -e
 
 echo "🤖 Installing AI and ML CLI tools..."
 
+# Check if we have sudo privileges
+HAS_SUDO=false
+if sudo -n true 2>/dev/null; then
+    HAS_SUDO=true
+fi
+
 #################
 # GitHub CLI
 #################
 if ! command -v gh >/dev/null 2>&1; then
-    echo "📦 Installing GitHub CLI..."
-    # Add GitHub CLI repository
-    type -p curl >/dev/null || sudo apt install curl -y
-    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-    sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-    sudo apt update
-    sudo apt install gh -y
-    echo "✅ GitHub CLI installed"
+    if [ "$HAS_SUDO" = true ]; then
+        echo "📦 Installing GitHub CLI via apt..."
+        type -p curl >/dev/null || sudo apt install curl -y
+        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+        sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+        sudo apt update
+        sudo apt install gh -y
+        echo "✅ GitHub CLI installed"
+    else
+        echo "📦 Installing GitHub CLI to ~/.local/bin..."
+        mkdir -p "$HOME/.local/bin"
+        GH_VERSION=$(curl -s https://api.github.com/repos/cli/cli/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+        wget "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz" -O /tmp/gh.tar.gz
+        tar -xzf /tmp/gh.tar.gz -C /tmp
+        mv "/tmp/gh_${GH_VERSION}_linux_amd64/bin/gh" "$HOME/.local/bin/"
+        chmod +x "$HOME/.local/bin/gh"
+        rm -rf /tmp/gh.tar.gz "/tmp/gh_${GH_VERSION}_linux_amd64"
+        echo "✅ GitHub CLI installed to ~/.local/bin"
+    fi
 else
     echo "✅ GitHub CLI is already installed"
 fi
