@@ -127,11 +127,60 @@ else
         if [ "$FISH_INSTALLED" = true ] && [ -x "$HOME/.local/bin/fish" ]; then
             FISH_PATH="$HOME/.local/bin/fish"
             echo "✅ Fish ${FISH_VERSION} installed to ~/.local/bin"
+
+            # Initialize Fish data files on first run
+            echo "📦 Initializing Fish data files..."
+            export PATH="$HOME/.local/bin:$PATH"
+            if echo "exit" | "$FISH_PATH" >/dev/null 2>&1; then
+                echo "✅ Fish data files initialized"
+            fi
         else
             echo "⚠️  Could not install Fish without sudo."
             echo "   Please ask your system administrator to run:"
             echo "   sudo apt install fish"
             FISH_PATH=""
+        fi
+    fi
+fi
+
+# Ensure ~/.local/bin is in PATH for all shells
+if [ -d "$HOME/.local/bin" ]; then
+    # Add to .profile (used by bash, sh, and login shells)
+    if [ -f "$HOME/.profile" ]; then
+        if ! grep -q 'PATH.*\.local/bin' "$HOME/.profile" 2>/dev/null; then
+            cat >> "$HOME/.profile" << 'EOF'
+
+# Add ~/.local/bin to PATH
+if [ -d "$HOME/.local/bin" ] ; then
+    PATH="$HOME/.local/bin:$PATH"
+fi
+EOF
+        fi
+    fi
+
+    # Add to .bashrc (for bash)
+    if [ -f "$HOME/.bashrc" ]; then
+        if ! grep -q 'PATH.*\.local/bin' "$HOME/.bashrc" 2>/dev/null; then
+            cat >> "$HOME/.bashrc" << 'EOF'
+
+# Add ~/.local/bin to PATH
+if [ -d "$HOME/.local/bin" ] ; then
+    PATH="$HOME/.local/bin:$PATH"
+fi
+EOF
+        fi
+    fi
+
+    # Add to .zshrc (for zsh)
+    if [ -f "$HOME/.zshrc" ]; then
+        if ! grep -q 'PATH.*\.local/bin' "$HOME/.zshrc" 2>/dev/null; then
+            cat >> "$HOME/.zshrc" << 'EOF'
+
+# Add ~/.local/bin to PATH
+if [ -d "$HOME/.local/bin" ] ; then
+    PATH="$HOME/.local/bin:$PATH"
+fi
+EOF
         fi
     fi
 fi
