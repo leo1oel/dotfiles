@@ -84,11 +84,58 @@ else
         FISH_PATH=$(which fish)
         echo "✅ Fish shell installation complete."
     else
-        echo "⚠️  Cannot install Fish shell without sudo."
-        echo "   Fish may already be installed by system admin, or you can:"
-        echo "   - Ask admin to install: sudo apt install fish"
-        echo "   - Use existing shell"
-        FISH_PATH=""
+        # Try to install Fish to ~/.local without sudo
+        echo "🚀 Attempting to install Fish shell to ~/.local (no sudo)..."
+        mkdir -p "$HOME/.local/bin"
+
+        # Try downloading precompiled Fish binary
+        FISH_VERSION="3.7.1"
+        FISH_URL="https://github.com/fish-shell/fish-shell/releases/download/${FISH_VERSION}/fish-${FISH_VERSION}.tar.xz"
+
+        if command -v wget >/dev/null 2>&1 || command -v curl >/dev/null 2>&1; then
+            # Download and extract
+            cd /tmp
+            if command -v wget >/dev/null 2>&1; then
+                wget -q "$FISH_URL" -O fish.tar.xz 2>/dev/null || true
+            else
+                curl -sL "$FISH_URL" -o fish.tar.xz 2>/dev/null || true
+            fi
+
+            if [ -f fish.tar.xz ]; then
+                tar -xf fish.tar.xz
+                cd "fish-${FISH_VERSION}"
+
+                # Build and install to ~/.local
+                if command -v cmake >/dev/null 2>&1 && command -v make >/dev/null 2>&1; then
+                    cmake -DCMAKE_INSTALL_PREFIX="$HOME/.local" . >/dev/null 2>&1 && \
+                    make >/dev/null 2>&1 && \
+                    make install >/dev/null 2>&1
+
+                    if [ -x "$HOME/.local/bin/fish" ]; then
+                        FISH_PATH="$HOME/.local/bin/fish"
+                        echo "✅ Fish installed to ~/.local/bin"
+                    else
+                        echo "⚠️  Fish build failed. Using default shell."
+                        FISH_PATH=""
+                    fi
+                else
+                    echo "⚠️  Build tools (cmake/make) not available."
+                    echo "   Ask admin to install Fish: sudo apt install fish"
+                    FISH_PATH=""
+                fi
+
+                # Cleanup
+                cd /tmp
+                rm -rf fish.tar.xz "fish-${FISH_VERSION}"
+            else
+                echo "⚠️  Could not download Fish. Using default shell."
+                FISH_PATH=""
+            fi
+        else
+            echo "⚠️  wget or curl not available. Cannot install Fish."
+            echo "   Ask admin to install: sudo apt install fish"
+            FISH_PATH=""
+        fi
     fi
 fi
 
