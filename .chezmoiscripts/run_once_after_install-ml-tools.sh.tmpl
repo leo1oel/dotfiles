@@ -94,34 +94,23 @@ fi
 # Install and configure Node.js LTS via fnm
 echo "📦 Installing Node.js LTS via fnm..."
 
-# Initialize fnm environment
+# Initialize fnm environment (explicitly use bash syntax)
 export PATH="$HOME/.local/share/fnm:$PATH"
-eval "$(fnm env --use-on-cd)"
+eval "$(fnm env --shell bash --use-on-cd)"
 
 # Install LTS version
 fnm install --lts
 fnm default lts-latest
 
-# Get the actual fnm-managed node path
-FNM_MULTISHELL_PATH="$(fnm env | grep 'FNM_MULTISHELL_PATH' | cut -d'=' -f2 | tr -d '"')"
-if [ -n "$FNM_MULTISHELL_PATH" ]; then
-    export PATH="$FNM_MULTISHELL_PATH/bin:$PATH"
-fi
-
-# Source fnm environment again to ensure PATH is updated
-eval "$(fnm env)"
+# Source fnm environment to update PATH with installed node
+eval "$(fnm env --shell bash)"
 
 # Verify Node.js version
 NODE_VERSION=$(node -v 2>/dev/null || echo "not found")
-echo "✅ Node.js $NODE_VERSION ready"
+echo "✅ Node.js $NODE_VERSION installed"
 
-# Warn if still using old version
-if [[ "$NODE_VERSION" == v12* ]] || [[ "$NODE_VERSION" == "not found" ]]; then
-    echo "⚠️  Warning: Node.js version is still old or not found."
-    echo "   fnm path: $(which fnm)"
-    echo "   node path: $(which node)"
-    echo "   Please restart your shell or run: fnm env | source"
-fi
+# Note for shell reload
+echo "ℹ️  Note: Fish shell will use the new Node.js version on next login"
 
 #################
 # Claude Code (via npm)
