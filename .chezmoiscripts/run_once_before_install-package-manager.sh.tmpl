@@ -90,7 +90,7 @@ else
 
         # Use official standalone binary from GitHub releases
         # These are single-file binaries that work on any Linux
-        FISH_VERSION="4.0.9"
+        FISH_VERSION="4.1.2"
         FISH_URL="https://github.com/fish-shell/fish-shell/releases/download/${FISH_VERSION}/fish-${FISH_VERSION}-linux-x86_64.tar.xz"
 
         cd /tmp
@@ -140,24 +140,42 @@ fi
 if [ -n "$FISH_PATH" ] && [ -x "$FISH_PATH" ]; then
     echo "🐚 Setting Fish as default shell..."
 
-    # Add to /etc/shells if we have sudo
     if [ "$HAS_SUDO" = true ]; then
+        # With sudo: add to /etc/shells and change default shell
         if ! grep -q "$FISH_PATH" /etc/shells 2>/dev/null; then
-            echo "$FISH_PATH" | sudo tee -a /etc/shells
+            echo "$FISH_PATH" | sudo tee -a /etc/shells >/dev/null
         fi
-    fi
 
-    # Check current default shell
-    CURRENT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
-    if [ "$CURRENT_SHELL" != "$FISH_PATH" ]; then
-        if chsh -s "$FISH_PATH" 2>/dev/null; then
-            echo "✅ Fish set as default shell. Please logout and login again for this to take effect."
+        # Check current default shell
+        CURRENT_SHELL=$(getent passwd "$USER" 2>/dev/null | cut -d: -f7)
+        if [ "$CURRENT_SHELL" != "$FISH_PATH" ]; then
+            if chsh -s "$FISH_PATH" 2>/dev/null; then
+                echo "✅ Fish set as default shell. Please logout and login again."
+            else
+                echo "ℹ️  Could not set Fish as default shell"
+                echo "   Try: sudo chsh -s $FISH_PATH $USER"
+            fi
         else
-            echo "ℹ️  Could not set Fish as default shell (may need admin approval)"
-            echo "   Ask admin to run: sudo chsh -s $FISH_PATH $USER"
+            echo "✅ Fish is already the default shell."
         fi
     else
-        echo "✅ Fish is already the default shell."
+        # Without sudo: can't change default shell, but can auto-start Fish
+        echo "ℹ️  Without sudo, cannot set Fish as system default shell."
+        echo "   Fish will auto-start from bash via ~/.bashrc"
+
+        # Add Fish auto-start to .bashrc if not already there
+        if [ -f "$HOME/.bashrc" ]; then
+            if ! grep -q "exec.*fish" "$HOME/.bashrc" 2>/dev/null; then
+                cat >> "$HOME/.bashrc" << 'EOF'
+
+# Auto-start Fish shell if available
+if [ -x "$HOME/.local/bin/fish" ] && [ -z "$FISH_VERSION" ]; then
+    exec "$HOME/.local/bin/fish"
+fi
+EOF
+                echo "✅ Added Fish auto-start to ~/.bashrc"
+            fi
+        fi
     fi
 fi
 
