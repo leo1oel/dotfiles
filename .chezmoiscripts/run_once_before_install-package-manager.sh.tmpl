@@ -338,6 +338,12 @@ if ! command -v neofetch >/dev/null 2>&1; then
     echo "✅ neofetch installed to ~/.local/bin"
 fi
 
+# Remove old fastfetch if it exists (causes GLIBC errors on older systems)
+if [ -f "$HOME/.local/bin/fastfetch" ]; then
+    rm -f "$HOME/.local/bin/fastfetch"
+    echo "🧹 Removed old fastfetch binary"
+fi
+
 #################
 # zellij (terminal multiplexer)
 #################
