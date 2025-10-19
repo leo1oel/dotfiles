@@ -53,60 +53,61 @@ fi
 #################
 # Install fnm if not present
 if ! command -v fnm >/dev/null 2>&1; then
-    echo "📦 Installing fnm (Fast Node Manager)..."
+    echo "📦 Installing fnm (Fast Node Manager) from GitHub..."
+    # Download fnm binary directly from GitHub (more reliable)
+    FNM_VERSION="v1.37.2"
+    FNM_URL="https://github.com/Schniz/fnm/releases/download/${FNM_VERSION}/fnm-linux.zip"
 
-    # Try installing via curl (with retry)
-    for i in 1 2 3; do
-        echo "🔄 Attempt $i/3..."
-        if curl -fsSL --connect-timeout 10 --max-time 30 https://fnm.vercel.app/install | bash -s -- --skip-shell 2>&1; then
-            export PATH="$HOME/.local/share/fnm:$PATH"
-            # Verify fnm is actually available
-            if command -v fnm >/dev/null 2>&1; then
-                echo "✅ fnm installed via curl"
-                break
-            fi
+    mkdir -p "$HOME/.local/share/fnm"
+    if curl -fsSL -o /tmp/fnm.zip "$FNM_URL" && \
+       unzip -o /tmp/fnm.zip -d /tmp && \
+       mv /tmp/fnm "$HOME/.local/share/fnm/" && \
+       chmod +x "$HOME/.local/share/fnm/fnm" && \
+       rm -f /tmp/fnm.zip; then
+        export PATH="$HOME/.local/share/fnm:$PATH"
+        if command -v fnm >/dev/null 2>&1; then
+            echo "✅ fnm installed from GitHub release"
+        else
+            echo "❌ fnm installation failed."
+            exit 1
         fi
-        if [ $i -lt 3 ]; then
-            echo "⚠️  Attempt $i failed, retrying..."
-            sleep 2
-        fi
-    done
-
-    # If still not available, try GitHub fallback
-    if ! command -v fnm >/dev/null 2>&1; then
-        echo "⚠️  curl installation failed. Trying GitHub release..."
-        # Fallback: Download fnm binary directly from GitHub
-        FNM_VERSION="v1.37.2"
-        FNM_URL="https://github.com/Schniz/fnm/releases/download/${FNM_VERSION}/fnm-linux.zip"
-
-        mkdir -p "$HOME/.local/share/fnm"
-        if curl -fsSL -o /tmp/fnm.zip "$FNM_URL" && \
-           unzip -o /tmp/fnm.zip -d /tmp && \
-           mv /tmp/fnm "$HOME/.local/share/fnm/" && \
-           chmod +x "$HOME/.local/share/fnm/fnm" && \
-           rm -f /tmp/fnm.zip; then
-            export PATH="$HOME/.local/share/fnm:$PATH"
-            if command -v fnm >/dev/null 2>&1; then
-                echo "✅ fnm installed from GitHub release"
-            fi
-        fi
-    fi
-
-    # Final check
-    if ! command -v fnm >/dev/null 2>&1; then
-        echo "❌ fnm installation failed completely."
-        echo "   Please install manually: https://github.com/Schniz/fnm"
+    else
+        echo "❌ Failed to download fnm from GitHub."
         exit 1
     fi
 fi
 
-# Always ensure we have Node.js LTS via fnm
+# Install and configure Node.js LTS via fnm
 echo "📦 Installing Node.js LTS via fnm..."
-eval "$(fnm env --use-on-cd)" 2>/dev/null || true
+
+# Initialize fnm environment
+export PATH="$HOME/.local/share/fnm:$PATH"
+eval "$(fnm env --use-on-cd)"
+
+# Install LTS version
 fnm install --lts
 fnm default lts-latest
-eval "$(fnm env)" 2>/dev/null || true
-echo "✅ Node.js $(node -v) ready"
+
+# Get the actual fnm-managed node path
+FNM_MULTISHELL_PATH="$(fnm env | grep 'FNM_MULTISHELL_PATH' | cut -d'=' -f2 | tr -d '"')"
+if [ -n "$FNM_MULTISHELL_PATH" ]; then
+    export PATH="$FNM_MULTISHELL_PATH/bin:$PATH"
+fi
+
+# Source fnm environment again to ensure PATH is updated
+eval "$(fnm env)"
+
+# Verify Node.js version
+NODE_VERSION=$(node -v 2>/dev/null || echo "not found")
+echo "✅ Node.js $NODE_VERSION ready"
+
+# Warn if still using old version
+if [[ "$NODE_VERSION" == v12* ]] || [[ "$NODE_VERSION" == "not found" ]]; then
+    echo "⚠️  Warning: Node.js version is still old or not found."
+    echo "   fnm path: $(which fnm)"
+    echo "   node path: $(which node)"
+    echo "   Please restart your shell or run: fnm env | source"
+fi
 
 #################
 # Claude Code (via npm)
