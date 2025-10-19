@@ -54,9 +54,45 @@ fi
 # Install fnm if not present
 if ! command -v fnm >/dev/null 2>&1; then
     echo "📦 Installing fnm (Fast Node Manager)..."
-    curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
-    export PATH="$HOME/.local/share/fnm:$PATH"
-    echo "✅ fnm installed"
+
+    # Try installing via curl (with retry)
+    FNM_INSTALLED=false
+    for i in 1 2 3; do
+        if curl -fsSL --connect-timeout 10 --max-time 30 https://fnm.vercel.app/install | bash -s -- --skip-shell; then
+            FNM_INSTALLED=true
+            break
+        else
+            echo "⚠️  Attempt $i failed, retrying..."
+            sleep 2
+        fi
+    done
+
+    if [ "$FNM_INSTALLED" = true ]; then
+        export PATH="$HOME/.local/share/fnm:$PATH"
+        echo "✅ fnm installed"
+    else
+        echo "⚠️  fnm installation via curl failed. Trying GitHub release..."
+        # Fallback: Download fnm binary directly from GitHub
+        FNM_VERSION="v1.37.2"
+        FNM_URL="https://github.com/Schniz/fnm/releases/download/${FNM_VERSION}/fnm-linux.zip"
+
+        mkdir -p "$HOME/.local/share/fnm"
+        cd /tmp
+        curl -fsSL -o fnm.zip "$FNM_URL" && \
+        unzip -o fnm.zip && \
+        mv fnm "$HOME/.local/share/fnm/" && \
+        chmod +x "$HOME/.local/share/fnm/fnm" && \
+        rm -f fnm.zip
+
+        export PATH="$HOME/.local/share/fnm:$PATH"
+
+        if command -v fnm >/dev/null 2>&1; then
+            echo "✅ fnm installed from GitHub release"
+        else
+            echo "❌ fnm installation failed completely."
+            exit 1
+        fi
+    fi
 fi
 
 # Always ensure we have Node.js LTS via fnm
@@ -68,7 +104,7 @@ if command -v fnm >/dev/null 2>&1; then
     eval "$(fnm env)"
     echo "✅ Node.js $(node -v) ready"
 else
-    echo "⚠️  fnm installation failed. Please install Node.js >= 18 manually."
+    echo "❌ fnm not available. Cannot install Node.js."
     exit 1
 fi
 
