@@ -2,7 +2,7 @@
 {{ $email := promptString "Your Email for .gitconfig" -}}
 
 [secret]
-command = "get-secret.sh"
+command = "{{ env "HOME" }}/.local/bin/get-secret.sh"
 
 [template]
 options = ["missingkey=zero"]
