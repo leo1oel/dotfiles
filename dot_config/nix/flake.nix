@@ -56,6 +56,7 @@
 
                 # Python
                 uv
+                nvitop  # NVIDIA GPU monitoring tool
 
                 # Node.js
                 fnm

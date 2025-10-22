@@ -105,6 +105,7 @@ chezmoi edit <file>   # 编辑文件
 - `huggingface-cli` - Hugging Face CLI
 - `wandb` - Weights & Biases
 - `ollama` - 本地 LLM
+- `nvitop` - NVIDIA GPU 监控工具
 
 ### 现代 CLI 工具
 - `bat` - 替代 cat
