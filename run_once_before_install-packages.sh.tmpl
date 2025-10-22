@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Install system packages based on OS
+# This script runs once before other installations
+
+set -euo pipefail
+
+echo "Installing system packages..."
+
+# Detect OS
+OS="$(uname -s)"
+
+case "$OS" in
+    Darwin)
+        echo "Detected macOS"
+        
+        # Check if Homebrew is installed
+        if ! command -v brew &> /dev/null; then
+            echo "Homebrew not found, installing..."
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            
+            # Add Homebrew to PATH
+            if [[ "$(uname -m)" == "arm64" ]]; then
+                eval "$(/opt/homebrew/bin/brew shellenv)"
+            else
+                eval "$(/usr/local/bin/brew shellenv)"
+            fi
+        fi
+        
+        # Install packages from Brewfile
+        if [ -f "${HOME}/.config/Brewfile" ]; then
+            echo "Installing packages from Brewfile..."
+            brew bundle --file="${HOME}/.config/Brewfile" --no-lock
+            echo "✓ Homebrew packages installed"
+        fi
+        ;;
+        
+    Linux)
+        echo "Detected Linux"
+        
+        # Check if running Ubuntu/Debian
+        if command -v apt-get &> /dev/null; then
+            # Install packages from packages.ubuntu
+            if [ -f "${HOME}/.config/packages.ubuntu" ]; then
+                echo "Installing packages from packages.ubuntu..."
+                # Filter out comments and empty lines, then install
+                grep -v '^#' "${HOME}/.config/packages.ubuntu" | grep -v '^$' | xargs sudo apt-get install -y
+                echo "✓ APT packages installed"
+            fi
+            
+            # Install uv if not already installed
+            if ! command -v uv &> /dev/null; then
+                echo "Installing uv..."
+                curl -LsSf https://astral.sh/uv/install.sh | sh
+                export PATH="${HOME}/.local/bin:${PATH}"
+                echo "✓ uv installed"
+            fi
+        fi
+        ;;
+        
+    *)
+        echo "Unsupported OS: $OS"
+        exit 1
+        ;;
+esac
+
+echo "✓ System packages installation complete"
+

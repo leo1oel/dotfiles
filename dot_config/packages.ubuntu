@@ -139,6 +139,7 @@ lolcat
 iotop
 sysstat
 lm-sensors
+# nvitop - NVIDIA GPU monitoring (installed via uv tool in run_once script)
 
 # ===========================================
 # Build Dependencies (for compiling from source)
