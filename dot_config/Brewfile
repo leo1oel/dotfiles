@@ -87,8 +87,6 @@ brew "ollama", restart_service: :changed
 brew "pytorch"
 brew "gemini-cli"
 
-# Note: nvitop (NVIDIA GPU monitoring) installed via uv tool in run_once script
-
 # ===========================================
 # System Monitoring & Performance
 # ===========================================

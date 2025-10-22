@@ -10,6 +10,7 @@ if test "$os" = Darwin
 else
     alias nn="sudo netstat -tnap"
     alias nna="sudo netstat -nap"
+    alias nvitop="uvx nvitop"
 end
 
 alias du="du -h"
@@ -18,6 +19,11 @@ alias duu="du -d1 -h"
 alias vi=nvim
 alias nv=neovide
 alias nano=nvim
+
+# Git aliases
+alias gaa="git add --all"
+alias gcmsg="git commit -m"
+alias gp="git push"
 
 if type -q zellij
     alias zz=zellij
