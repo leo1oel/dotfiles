@@ -29,7 +29,7 @@ ripgrep
 bat
 fd-find
 fzf
-zoxide
+# zoxide - installed via GitHub release in run_once script (not in Ubuntu 20.04 repos)
 # eza - better ls (requires custom repo, installed in run_once script)
 # zellij - terminal multiplexer (not in apt, will be installed via cargo/download)
 
@@ -71,7 +71,7 @@ direnv
 jq
 tree
 htop
-btop
+# btop - not available in Ubuntu 20.04 repos (use htop instead)
 ncdu
 
 # ===========================================
@@ -117,7 +117,7 @@ tig
 # Formatters & Linters
 # ===========================================
 shellcheck
-shfmt
+# shfmt - not available in Ubuntu 20.04 repos (install via GitHub or snap if needed)
 # prettier - install via npm
 # black - install via pip
 # ruff - install via pip or cargo

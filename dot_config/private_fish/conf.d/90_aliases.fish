@@ -18,7 +18,6 @@ alias duu="du -d1 -h"
 
 alias vi=nvim
 alias nv=neovide
-alias nano=nvim
 
 # Git aliases
 alias gaa="git add --all"

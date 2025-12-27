@@ -1,5 +1,6 @@
-{{ $username := promptString "User name for .gitconfig" -}}
-{{ $email := promptString "Your Email for .gitconfig" -}}
+{{- /* Git user config: username and email will be written to ~/.gitconfig for commit author info */ -}}
+{{ $username := promptString "Git username (shown as commit author)" -}}
+{{ $email := promptString "Git email (shown as commit author)" -}}
 
 [secret]
 command = "{{ env "HOME" }}/.local/bin/get-secret.sh"

@@ -7,7 +7,6 @@ if type -q helix
         alias hx=helix
     end
 
-    # Prefer Helix over any other editors
+    # Prefer Helix over vi
     alias vi=helix
-    alias nano=helix
 end
