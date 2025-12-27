@@ -9,6 +9,9 @@ set -e
 
 echo "🤖 Installing AI and ML CLI tools..."
 
+# Ensure PATH includes directories where tools are installed
+export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$HOME/.local/share/fnm:$PATH"
+
 # Check if we have sudo privileges
 HAS_SUDO=false
 if sudo -n true 2>/dev/null; then
