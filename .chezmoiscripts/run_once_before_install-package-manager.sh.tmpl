@@ -374,6 +374,18 @@ if ! command -v zellij >/dev/null 2>&1; then
 fi
 
 #################
+# direnv (environment switcher)
+#################
+if ! command -v direnv >/dev/null 2>&1; then
+    echo "📦 Installing direnv..."
+    mkdir -p "$HOME/.local/bin"
+    DIRENV_VERSION=$(curl -s https://api.github.com/repos/direnv/direnv/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+    wget "https://github.com/direnv/direnv/releases/download/v${DIRENV_VERSION}/direnv.linux-amd64" -O "$HOME/.local/bin/direnv"
+    chmod +x "$HOME/.local/bin/direnv"
+    echo "✅ direnv installed to ~/.local/bin"
+fi
+
+#################
 # Create symlinks for renamed commands
 #################
 echo "🔗 Creating symlinks for commands with different names on Ubuntu..."

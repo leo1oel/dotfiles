@@ -67,7 +67,7 @@ docker-buildx
 # ===========================================
 # Development Tools
 # ===========================================
-direnv
+# direnv - installed via GitHub release in run_once script (for non-sudo compatibility)
 jq
 tree
 htop
