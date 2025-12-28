@@ -70,6 +70,20 @@ if [ "$HAS_SUDO" = true ]; then
 fi
 
 #################
+# Git (latest version via PPA)
+#################
+if [ "$HAS_SUDO" = true ]; then
+    echo "🔧 Adding Git PPA for latest version..."
+    sudo apt-add-repository ppa:git-core/ppa -y
+    sudo apt update
+    echo "📦 Installing/upgrading Git..."
+    sudo apt install -y git
+    echo "✅ Git $(git --version | awk '{print $3}') installed"
+else
+    echo "ℹ️  Using system Git (may be outdated)"
+fi
+
+#################
 # Fish Shell
 #################
 if command -v fish >/dev/null 2>&1; then
