@@ -89,6 +89,17 @@ fi
 if command -v fish >/dev/null 2>&1; then
     echo "✅ Fish shell is already installed at $(command -v fish)"
     FISH_PATH=$(which fish)
+
+    # Ensure cd.fish exists (required by zoxide)
+    mkdir -p "$HOME/.local/share/fish/functions"
+    if [ ! -f "$HOME/.local/share/fish/functions/cd.fish" ]; then
+        cat > "$HOME/.local/share/fish/functions/cd.fish" << 'CDEOF'
+function cd --description 'Change directory'
+    builtin cd $argv
+end
+CDEOF
+        echo "✅ Created cd.fish function for zoxide compatibility"
+    fi
 else
     if [ "$HAS_SUDO" = true ]; then
         echo "🚀 Installing Fish shell via PPA..."
@@ -97,6 +108,17 @@ else
         sudo apt install fish -y
         FISH_PATH=$(which fish)
         echo "✅ Fish shell installation complete."
+
+        # Create missing cd.fish function (required by zoxide)
+        mkdir -p "$HOME/.local/share/fish/functions"
+        if [ ! -f "$HOME/.local/share/fish/functions/cd.fish" ]; then
+            cat > "$HOME/.local/share/fish/functions/cd.fish" << 'CDEOF'
+function cd --description 'Change directory'
+    builtin cd $argv
+end
+CDEOF
+            echo "✅ Created cd.fish function"
+        fi
     else
         # Try to install Fish to ~/.local without sudo
         echo "🚀 Installing Fish shell to ~/.local (no sudo)..."
@@ -147,6 +169,17 @@ else
             export PATH="$HOME/.local/bin:$PATH"
             if echo "exit" | "$FISH_PATH" >/dev/null 2>&1; then
                 echo "✅ Fish data files initialized"
+            fi
+
+            # Create missing cd.fish function (required by zoxide)
+            mkdir -p "$HOME/.local/share/fish/functions"
+            if [ ! -f "$HOME/.local/share/fish/functions/cd.fish" ]; then
+                cat > "$HOME/.local/share/fish/functions/cd.fish" << 'CDEOF'
+function cd --description 'Change directory'
+    builtin cd $argv
+end
+CDEOF
+                echo "✅ Created cd.fish function"
             fi
         else
             echo "⚠️  Could not install Fish without sudo."
