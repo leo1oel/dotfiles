@@ -1,12 +1,17 @@
 
 if type -q zoxide
-    # Use --no-cmd to avoid errors when Fish is installed in non-standard location
-    # This prevents zoxide from trying to override the cd command
-    # Use 'z' command instead of 'cd' for zoxide navigation
-    zoxide init fish --no-cmd | source
-
-    # Optional: Create a simple 'z' alias if you want
-    # You can still use 'cd' normally, and 'z' for smart directory jumping
+    # Initialize zoxide with error handling
+    # Suppress errors when Fish data files are missing (non-standard installation)
+    if zoxide init fish --no-cmd 2>/dev/null | source
+        # Successfully initialized - you can use 'z' for smart directory jumping
+    else
+        # Fallback: just set up the basic 'z' command without cd override
+        set -gx _ZO_DATA_DIR $HOME/.local/share/zoxide
+        function z
+            set -l result (zoxide query --exclude $PWD -- $argv)
+            and cd $result
+        end
+    end
 else
-    echo "zoxide was not installed."
+    # zoxide not installed - silently skip (not an error)
 end
