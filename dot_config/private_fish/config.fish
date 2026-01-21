@@ -18,3 +18,5 @@ if status is-interactive
         end
     end
 end
+
+source /opt/conda/etc/fish/conf.d/conda.fish
