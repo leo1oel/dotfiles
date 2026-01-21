@@ -329,6 +329,33 @@ if ! command -v delta >/dev/null 2>&1; then
 fi
 
 #################
+# GitHub CLI (gh)
+#################
+if ! command -v gh >/dev/null 2>&1; then
+    echo "📦 Installing GitHub CLI (gh)..."
+    if [ "$HAS_SUDO" = true ]; then
+        # Install via official GitHub CLI apt repository
+        sudo mkdir -p /etc/apt/keyrings
+        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+        sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+        sudo apt update
+        sudo apt install -y gh
+        echo "✅ GitHub CLI installed via apt"
+    else
+        # Install latest release to ~/.local/bin without sudo
+        mkdir -p "$HOME/.local/bin"
+        GH_VERSION=$(curl -s https://api.github.com/repos/cli/cli/releases/latest | grep '"tag_name"' | sed -E 's/.*"v?([^"]+)".*/\1/')
+        wget "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz" -O /tmp/gh.tar.gz
+        tar -xzf /tmp/gh.tar.gz -C /tmp
+        mv "/tmp/gh_${GH_VERSION}_linux_amd64/bin/gh" "$HOME/.local/bin/"
+        chmod +x "$HOME/.local/bin/gh"
+        rm -rf /tmp/gh.tar.gz "/tmp/gh_${GH_VERSION}_linux_amd64"
+        echo "✅ GitHub CLI installed to ~/.local/bin"
+    fi
+fi
+
+#################
 # lazygit (git TUI)
 #################
 if ! command -v lazygit >/dev/null 2>&1; then
@@ -416,6 +443,93 @@ if ! command -v direnv >/dev/null 2>&1; then
     wget "https://github.com/direnv/direnv/releases/download/v${DIRENV_VERSION}/direnv.linux-amd64" -O "$HOME/.local/bin/direnv"
     chmod +x "$HOME/.local/bin/direnv"
     echo "✅ direnv installed to ~/.local/bin"
+fi
+
+#################
+# btop (system monitor)
+#################
+if ! command -v btop >/dev/null 2>&1; then
+    echo "📦 Installing btop..."
+    mkdir -p "$HOME/.local/bin"
+    BTOP_VERSION=$(curl -s https://api.github.com/repos/aristocratos/btop/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+    wget "https://github.com/aristocratos/btop/releases/download/v${BTOP_VERSION}/btop-x86_64-linux-musl.tbz" -O /tmp/btop.tbz
+    tar -xjf /tmp/btop.tbz -C /tmp
+    mv /tmp/btop/bin/btop "$HOME/.local/bin/"
+    chmod +x "$HOME/.local/bin/btop"
+    rm -rf /tmp/btop.tbz /tmp/btop
+    echo "✅ btop installed to ~/.local/bin"
+fi
+
+#################
+# Optional: Bitwarden-based CLI logins (gh, wandb, huggingface)
+#################
+if [ -t 0 ]; then
+    echo "🔐 Optional: use Bitwarden to auto-login CLI tools"
+    read -r -p "Set up Bitwarden-based logins now? [y/N] " BW_SETUP
+    if [[ "$BW_SETUP" =~ ^[Yy]$ ]]; then
+        if ! command -v bw >/dev/null 2>&1; then
+            echo "⚠️  Bitwarden CLI (bw) not found. Skipping auto-login."
+            echo "   Install it first, then re-run this script if needed."
+        else
+            BW_SESSION=""
+            if bw login --check >/dev/null 2>&1; then
+                echo "🔓 Bitwarden is already logged in. Unlocking vault..."
+            else
+                echo "🔐 Bitwarden login required."
+                echo "   Tip: using API key avoids email OTP."
+                read -r -p "Login with API key? [y/N] " BW_APIKEY_LOGIN
+                if [[ "$BW_APIKEY_LOGIN" =~ ^[Yy]$ ]]; then
+                    if [ -z "$BW_CLIENTID" ]; then
+                        read -r -p "Bitwarden Client ID: " BW_CLIENTID
+                    fi
+                    if [ -z "$BW_CLIENTSECRET" ]; then
+                        read -r -s -p "Bitwarden Client Secret: " BW_CLIENTSECRET
+                        echo
+                    fi
+                    if [ -n "$BW_CLIENTID" ] && [ -n "$BW_CLIENTSECRET" ]; then
+                        BW_CLIENTID="$BW_CLIENTID" BW_CLIENTSECRET="$BW_CLIENTSECRET" bw login --apikey >/dev/null 2>&1 || true
+                    fi
+                else
+                    read -r -p "Bitwarden email: " BW_EMAIL
+                    if [ -n "$BW_EMAIL" ]; then
+                        bw login "$BW_EMAIL" >/dev/null 2>&1 || true
+                    fi
+                fi
+            fi
+
+            if bw login --check >/dev/null 2>&1; then
+                BW_SESSION=$(bw unlock --raw 2>/dev/null || true)
+            fi
+
+            if [ -n "$BW_SESSION" ]; then
+                export BW_SESSION
+
+                BW_GH_ITEM=${BW_GH_ITEM:-"GitHub CLI Token"}
+                BW_WANDB_ITEM=${BW_WANDB_ITEM:-"W&B API Key"}
+                BW_HF_ITEM=${BW_HF_ITEM:-"Hugging Face Token"}
+
+                GH_TOKEN=$(bw get password "$BW_GH_ITEM" 2>/dev/null || true)
+                WANDB_API_KEY=$(bw get password "$BW_WANDB_ITEM" 2>/dev/null || true)
+                HF_TOKEN=$(bw get password "$BW_HF_ITEM" 2>/dev/null || true)
+
+                if [ -n "$GH_TOKEN" ] && command -v gh >/dev/null 2>&1; then
+                    printf '%s' "$GH_TOKEN" | gh auth login --with-token >/dev/null 2>&1 && echo "✅ gh authenticated"
+                fi
+
+                if [ -n "$WANDB_API_KEY" ] && command -v wandb >/dev/null 2>&1; then
+                    wandb login "$WANDB_API_KEY" >/dev/null 2>&1 && echo "✅ wandb authenticated"
+                fi
+
+                if [ -n "$HF_TOKEN" ] && command -v huggingface-cli >/dev/null 2>&1; then
+                    huggingface-cli login --token "$HF_TOKEN" >/dev/null 2>&1 && echo "✅ Hugging Face CLI authenticated"
+                fi
+
+                echo "ℹ️  Auto-login complete (missing tools or tokens are skipped)."
+            else
+                echo "⚠️  Could not unlock Bitwarden; skipping auto-login."
+            fi
+        fi
+    fi
 fi
 
 #################

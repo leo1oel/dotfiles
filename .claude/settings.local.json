@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "WebSearch"
+      "WebSearch",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix __fish_data_dir path for zoxide when Fish installed in ~/.local\n\n- Set __fish_data_dir to ~/.local/share/fish before zoxide init\n- This ensures zoxide can find the cd.fish function we created\n- Only sets if cd.fish doesn''t exist in current __fish_data_dir\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push)"
     ],
     "deny": [],
     "ask": []

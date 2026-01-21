@@ -90,7 +90,6 @@ brew "gemini-cli"
 # ===========================================
 # System Monitoring & Performance
 # ===========================================
-brew "htop"
 brew "btop"
 brew "glances"
 brew "fastfetch"

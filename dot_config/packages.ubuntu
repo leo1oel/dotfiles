@@ -70,8 +70,7 @@ docker-buildx
 # direnv - installed via GitHub release in run_once script (for non-sudo compatibility)
 jq
 tree
-htop
-# btop - not available in Ubuntu 20.04 repos (use htop instead)
+# btop - installed via GitHub release in run_once script (better than htop)
 ncdu
 
 # ===========================================
