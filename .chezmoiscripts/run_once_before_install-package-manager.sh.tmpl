@@ -468,12 +468,26 @@ if ! command -v btop >/dev/null 2>&1; then
     echo "📦 Installing btop..."
     mkdir -p "$HOME/.local/bin"
     BTOP_VERSION=$(curl -s https://api.github.com/repos/aristocratos/btop/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
-    wget "https://github.com/aristocratos/btop/releases/download/v${BTOP_VERSION}/btop-x86_64-linux-musl.tbz" -O /tmp/btop.tbz
-    tar -xjf /tmp/btop.tbz -C /tmp
-    mv /tmp/btop/bin/btop "$HOME/.local/bin/"
-    chmod +x "$HOME/.local/bin/btop"
-    rm -rf /tmp/btop.tbz /tmp/btop
-    echo "✅ btop installed to ~/.local/bin"
+    BTOP_URL_BASE="https://github.com/aristocratos/btop/releases/download/v${BTOP_VERSION}"
+    BTOP_ASSET_1="btop-x86_64-linux-musl.tbz"
+    BTOP_ASSET_2="btop-x86_64-unknown-linux-musl.tbz"
+    if wget -q "${BTOP_URL_BASE}/${BTOP_ASSET_1}" -O /tmp/btop.tbz; then
+        :
+    elif wget -q "${BTOP_URL_BASE}/${BTOP_ASSET_2}" -O /tmp/btop.tbz; then
+        :
+    else
+        echo "⚠️  Could not download btop from ${BTOP_URL_BASE}"
+        echo "   Tried ${BTOP_ASSET_1} and ${BTOP_ASSET_2}"
+        rm -f /tmp/btop.tbz
+        BTOP_VERSION=""
+    fi
+    if [ -s /tmp/btop.tbz ]; then
+        tar -xjf /tmp/btop.tbz -C /tmp
+        mv /tmp/btop/bin/btop "$HOME/.local/bin/"
+        chmod +x "$HOME/.local/bin/btop"
+        rm -rf /tmp/btop.tbz /tmp/btop
+        echo "✅ btop installed to ~/.local/bin"
+    fi
 fi
 
 #################
