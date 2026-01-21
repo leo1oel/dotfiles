@@ -334,12 +334,21 @@ if ! command -v delta >/dev/null 2>&1; then
     echo "📦 Installing git-delta..."
     mkdir -p "$HOME/.local/bin"
     DELTA_VERSION=$(curl -s https://api.github.com/repos/dandavison/delta/releases/latest | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
-    wget "https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu.tar.gz" -O /tmp/delta.tar.gz
-    tar -xzf /tmp/delta.tar.gz -C /tmp
-    mv "/tmp/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu/delta" "$HOME/.local/bin/"
-    chmod +x "$HOME/.local/bin/delta"
-    rm -rf /tmp/delta.tar.gz "/tmp/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu"
-    echo "✅ git-delta installed to ~/.local/bin"
+    if [ -n "$DELTA_VERSION" ]; then
+        DELTA_URL="https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+        if wget -q "$DELTA_URL" -O /tmp/delta.tar.gz; then
+            tar -xzf /tmp/delta.tar.gz -C /tmp
+            mv "/tmp/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu/delta" "$HOME/.local/bin/"
+            chmod +x "$HOME/.local/bin/delta"
+            rm -rf /tmp/delta.tar.gz "/tmp/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu"
+            echo "✅ git-delta installed to ~/.local/bin"
+        else
+            echo "⚠️  Could not download git-delta from ${DELTA_URL}"
+            rm -f /tmp/delta.tar.gz
+        fi
+    else
+        echo "⚠️  Could not determine git-delta version (GitHub API may be rate-limited). Skipping."
+    fi
 fi
 
 #################
