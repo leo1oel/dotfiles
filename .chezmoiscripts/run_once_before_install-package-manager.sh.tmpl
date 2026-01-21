@@ -524,6 +524,7 @@ echo "✅ Oh My Tmux installed to $OHMY_TMUX_BASE"
 # Optional: Bitwarden-based CLI logins (gh, wandb, huggingface)
 #################
 if [ -t 0 ]; then
+    export PATH="$HOME/.local/bin:$PATH"
     echo "🔐 Optional: use Bitwarden to auto-login CLI tools"
     read -r -p "Set up Bitwarden-based logins now? [y/N] " BW_SETUP
     if [[ "$BW_SETUP" =~ ^[Yy]$ ]]; then
