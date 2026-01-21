@@ -39,6 +39,22 @@ else
     chsh -s /opt/homebrew/bin/fish
 fi
 
+#################
+# Oh My Tmux
+#################
+OHMY_TMUX_BASE="${XDG_CONFIG_HOME:-$HOME/.config}/tmux"
+OHMY_TMUX_DIR="$OHMY_TMUX_BASE/oh-my-tmux"
+if [ -e "$OHMY_TMUX_BASE/tmux.conf" ] || [ -e "$OHMY_TMUX_BASE/tmux.conf.local" ] || [ -e "$HOME/.tmux.conf" ]; then
+    echo "ℹ️  Existing tmux config detected. Skipping Oh My Tmux install."
+else
+    echo "📦 Installing Oh My Tmux..."
+    mkdir -p "$OHMY_TMUX_BASE"
+    git clone --single-branch https://github.com/gpakosz/.tmux.git "$OHMY_TMUX_DIR"
+    ln -s "$OHMY_TMUX_DIR/.tmux.conf" "$OHMY_TMUX_BASE/tmux.conf"
+    cp "$OHMY_TMUX_DIR/.tmux.conf.local" "$OHMY_TMUX_BASE/tmux.conf.local"
+    echo "✅ Oh My Tmux installed to $OHMY_TMUX_BASE"
+fi
+
 {{ else if eq .chezmoi.os "linux" -}}
 #################
 # Linux - APT
@@ -458,6 +474,22 @@ if ! command -v btop >/dev/null 2>&1; then
     chmod +x "$HOME/.local/bin/btop"
     rm -rf /tmp/btop.tbz /tmp/btop
     echo "✅ btop installed to ~/.local/bin"
+fi
+
+#################
+# Oh My Tmux
+#################
+OHMY_TMUX_BASE="${XDG_CONFIG_HOME:-$HOME/.config}/tmux"
+OHMY_TMUX_DIR="$OHMY_TMUX_BASE/oh-my-tmux"
+if [ -e "$OHMY_TMUX_BASE/tmux.conf" ] || [ -e "$OHMY_TMUX_BASE/tmux.conf.local" ] || [ -e "$HOME/.tmux.conf" ]; then
+    echo "ℹ️  Existing tmux config detected. Skipping Oh My Tmux install."
+else
+    echo "📦 Installing Oh My Tmux..."
+    mkdir -p "$OHMY_TMUX_BASE"
+    git clone --single-branch https://github.com/gpakosz/.tmux.git "$OHMY_TMUX_DIR"
+    ln -s "$OHMY_TMUX_DIR/.tmux.conf" "$OHMY_TMUX_BASE/tmux.conf"
+    cp "$OHMY_TMUX_DIR/.tmux.conf.local" "$OHMY_TMUX_BASE/tmux.conf.local"
+    echo "✅ Oh My Tmux installed to $OHMY_TMUX_BASE"
 fi
 
 #################
