@@ -466,7 +466,11 @@ if ! command -v btop >/dev/null 2>&1; then
     echo "📦 Installing btop..."
     mkdir -p "$HOME/.local/bin"
     BTOP_VERSION=$(curl -s https://api.github.com/repos/aristocratos/btop/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
-    BTOP_URL_BASE="https://github.com/aristocratos/btop/releases/download/v${BTOP_VERSION}"
+    if [ -n "$BTOP_VERSION" ]; then
+        BTOP_URL_BASE="https://github.com/aristocratos/btop/releases/download/v${BTOP_VERSION}"
+    else
+        BTOP_URL_BASE="https://github.com/aristocratos/btop/releases/latest/download"
+    fi
     BTOP_ASSET_1="btop-x86_64-linux-musl.tbz"
     BTOP_ASSET_2="btop-x86_64-unknown-linux-musl.tbz"
     if wget -q "${BTOP_URL_BASE}/${BTOP_ASSET_1}" -O /tmp/btop.tbz; then
@@ -495,8 +499,16 @@ if ! command -v bw >/dev/null 2>&1; then
     echo "📦 Installing Bitwarden CLI (bw)..."
     mkdir -p "$HOME/.local/bin"
     BW_VERSION=$(curl -s https://api.github.com/repos/bitwarden/cli/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
-    BW_URL="https://github.com/bitwarden/cli/releases/download/v${BW_VERSION}/bw-linux-${BW_VERSION}.zip"
-    curl -fsSL "$BW_URL" -o /tmp/bw.zip
+    if [ -n "$BW_VERSION" ]; then
+        BW_URL="https://github.com/bitwarden/cli/releases/download/v${BW_VERSION}/bw-linux-${BW_VERSION}.zip"
+    else
+        BW_URL="https://github.com/bitwarden/cli/releases/latest/download/bw-linux.zip"
+    fi
+    if ! curl -fsSL "$BW_URL" -o /tmp/bw.zip; then
+        echo "⚠️  Could not download Bitwarden CLI from ${BW_URL}"
+        rm -f /tmp/bw.zip
+    fi
+    if [ -s /tmp/bw.zip ]; then
     rm -rf /tmp/bw
     mkdir -p /tmp/bw
     unzip -o /tmp/bw.zip -d /tmp/bw >/dev/null 2>&1
@@ -504,6 +516,7 @@ if ! command -v bw >/dev/null 2>&1; then
     chmod +x "$HOME/.local/bin/bw"
     rm -rf /tmp/bw /tmp/bw.zip
     echo "✅ Bitwarden CLI installed to ~/.local/bin"
+    fi
 fi
 
 #################
