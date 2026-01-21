@@ -44,16 +44,14 @@ fi
 #################
 OHMY_TMUX_BASE="${XDG_CONFIG_HOME:-$HOME/.config}/tmux"
 OHMY_TMUX_DIR="$OHMY_TMUX_BASE/oh-my-tmux"
-if [ -e "$OHMY_TMUX_BASE/tmux.conf" ] || [ -e "$OHMY_TMUX_BASE/tmux.conf.local" ] || [ -e "$HOME/.tmux.conf" ]; then
-    echo "ℹ️  Existing tmux config detected. Skipping Oh My Tmux install."
-else
-    echo "📦 Installing Oh My Tmux..."
-    mkdir -p "$OHMY_TMUX_BASE"
-    git clone --single-branch https://github.com/gpakosz/.tmux.git "$OHMY_TMUX_DIR"
-    ln -s "$OHMY_TMUX_DIR/.tmux.conf" "$OHMY_TMUX_BASE/tmux.conf"
-    cp "$OHMY_TMUX_DIR/.tmux.conf.local" "$OHMY_TMUX_BASE/tmux.conf.local"
-    echo "✅ Oh My Tmux installed to $OHMY_TMUX_BASE"
-fi
+echo "📦 Installing Oh My Tmux (force overwrite)..."
+rm -f "$OHMY_TMUX_BASE/tmux.conf" "$OHMY_TMUX_BASE/tmux.conf.local" "$HOME/.tmux.conf"
+rm -rf "$OHMY_TMUX_DIR"
+mkdir -p "$OHMY_TMUX_BASE"
+git clone --single-branch https://github.com/gpakosz/.tmux.git "$OHMY_TMUX_DIR"
+ln -sf "$OHMY_TMUX_DIR/.tmux.conf" "$OHMY_TMUX_BASE/tmux.conf"
+cp -f "$OHMY_TMUX_DIR/.tmux.conf.local" "$OHMY_TMUX_BASE/tmux.conf.local"
+echo "✅ Oh My Tmux installed to $OHMY_TMUX_BASE"
 
 {{ else if eq .chezmoi.os "linux" -}}
 #################
@@ -491,20 +489,36 @@ if ! command -v btop >/dev/null 2>&1; then
 fi
 
 #################
+# Bitwarden CLI (bw)
+#################
+if ! command -v bw >/dev/null 2>&1; then
+    echo "📦 Installing Bitwarden CLI (bw)..."
+    mkdir -p "$HOME/.local/bin"
+    BW_VERSION=$(curl -s https://api.github.com/repos/bitwarden/cli/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+    BW_URL="https://github.com/bitwarden/cli/releases/download/v${BW_VERSION}/bw-linux-${BW_VERSION}.zip"
+    curl -fsSL "$BW_URL" -o /tmp/bw.zip
+    rm -rf /tmp/bw
+    mkdir -p /tmp/bw
+    unzip -o /tmp/bw.zip -d /tmp/bw >/dev/null 2>&1
+    mv /tmp/bw/bw "$HOME/.local/bin/bw"
+    chmod +x "$HOME/.local/bin/bw"
+    rm -rf /tmp/bw /tmp/bw.zip
+    echo "✅ Bitwarden CLI installed to ~/.local/bin"
+fi
+
+#################
 # Oh My Tmux
 #################
 OHMY_TMUX_BASE="${XDG_CONFIG_HOME:-$HOME/.config}/tmux"
 OHMY_TMUX_DIR="$OHMY_TMUX_BASE/oh-my-tmux"
-if [ -e "$OHMY_TMUX_BASE/tmux.conf" ] || [ -e "$OHMY_TMUX_BASE/tmux.conf.local" ] || [ -e "$HOME/.tmux.conf" ]; then
-    echo "ℹ️  Existing tmux config detected. Skipping Oh My Tmux install."
-else
-    echo "📦 Installing Oh My Tmux..."
-    mkdir -p "$OHMY_TMUX_BASE"
-    git clone --single-branch https://github.com/gpakosz/.tmux.git "$OHMY_TMUX_DIR"
-    ln -s "$OHMY_TMUX_DIR/.tmux.conf" "$OHMY_TMUX_BASE/tmux.conf"
-    cp "$OHMY_TMUX_DIR/.tmux.conf.local" "$OHMY_TMUX_BASE/tmux.conf.local"
-    echo "✅ Oh My Tmux installed to $OHMY_TMUX_BASE"
-fi
+echo "📦 Installing Oh My Tmux (force overwrite)..."
+rm -f "$OHMY_TMUX_BASE/tmux.conf" "$OHMY_TMUX_BASE/tmux.conf.local" "$HOME/.tmux.conf"
+rm -rf "$OHMY_TMUX_DIR"
+mkdir -p "$OHMY_TMUX_BASE"
+git clone --single-branch https://github.com/gpakosz/.tmux.git "$OHMY_TMUX_DIR"
+ln -sf "$OHMY_TMUX_DIR/.tmux.conf" "$OHMY_TMUX_BASE/tmux.conf"
+cp -f "$OHMY_TMUX_DIR/.tmux.conf.local" "$OHMY_TMUX_BASE/tmux.conf.local"
+echo "✅ Oh My Tmux installed to $OHMY_TMUX_BASE"
 
 #################
 # Optional: Bitwarden-based CLI logins (gh, wandb, huggingface)
