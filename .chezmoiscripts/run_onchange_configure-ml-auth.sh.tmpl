@@ -8,6 +8,9 @@
 set -e
 
 echo "🔐 Checking AI/ML CLI authentication status..."
+NEEDS_GH=false
+NEEDS_HF=false
+NEEDS_WANDB=false
 
 #################
 # GitHub CLI
@@ -17,6 +20,7 @@ if command -v gh >/dev/null 2>&1; then
         echo "✅ GitHub CLI is authenticated"
     else
         echo "⚠️  GitHub CLI not authenticated. Run: gh auth login"
+        NEEDS_GH=true
     fi
 fi
 
@@ -28,6 +32,7 @@ if command -v hf >/dev/null 2>&1; then
         echo "✅ Hugging Face CLI is authenticated"
     else
         echo "⚠️  Hugging Face CLI not authenticated. Run: hf auth login"
+        NEEDS_HF=true
     fi
 fi
 
@@ -42,14 +47,27 @@ if command -v wandb >/dev/null 2>&1; then
         echo "✅ wandb is authenticated"
     else
         echo "⚠️  wandb not authenticated. Run: wandb login"
+        NEEDS_WANDB=true
     fi
 fi
 
-echo ""
-echo "📝 To authenticate, run:"
-echo "   gh auth login      # GitHub"
-echo "   hf auth login      # Hugging Face"
-echo "   wandb login        # Weights & Biases"
-echo ""
+if [ "$NEEDS_GH" = true ] || [ "$NEEDS_HF" = true ] || [ "$NEEDS_WANDB" = true ]; then
+    echo ""
+    echo "📝 To authenticate, run:"
+    if [ "$NEEDS_GH" = true ]; then
+        echo "   gh auth login      # GitHub"
+    fi
+    if [ "$NEEDS_HF" = true ]; then
+        echo "   hf auth login      # Hugging Face"
+    fi
+    if [ "$NEEDS_WANDB" = true ]; then
+        echo "   wandb login        # Weights & Biases"
+    fi
+    echo ""
+else
+    echo ""
+    echo "✅ All AI/ML CLI tools are authenticated."
+    echo ""
+fi
 
 {{ end -}}

@@ -559,7 +559,8 @@ if [ -t 0 ]; then
             fi
 
             if bw login --check >/dev/null 2>&1; then
-                BW_SESSION=$(bw unlock --raw 2>/dev/null || true)
+                echo "🔐 Enter Bitwarden master password to unlock (input hidden)"
+                BW_SESSION=$(bw unlock --raw || true)
             fi
 
             if [ -n "$BW_SESSION" ]; then

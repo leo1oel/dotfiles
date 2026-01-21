@@ -160,10 +160,42 @@ fi
 echo ""
 echo "🔐 Authentication Setup"
 echo "======================="
-echo "Run these commands to authenticate:"
-echo "  gh auth login                             # GitHub"
-echo "  hf auth login                             # Hugging Face"
-echo "  wandb login                               # Weights & Biases"
+NEEDS_GH=false
+NEEDS_HF=false
+NEEDS_WANDB=false
+if command -v gh >/dev/null 2>&1; then
+    if ! gh auth status >/dev/null 2>&1; then
+        NEEDS_GH=true
+    fi
+fi
+if command -v hf >/dev/null 2>&1; then
+    if ! hf auth whoami >/dev/null 2>&1; then
+        NEEDS_HF=true
+    fi
+fi
+if command -v wandb >/dev/null 2>&1; then
+    if [ -f ~/.netrc ] && grep -q "api.wandb.ai" ~/.netrc 2>/dev/null; then
+        :
+    elif [ -f ~/.config/wandb/settings ] && grep -q "api_key" ~/.config/wandb/settings 2>/dev/null; then
+        :
+    else
+        NEEDS_WANDB=true
+    fi
+fi
+if [ "$NEEDS_GH" = true ] || [ "$NEEDS_HF" = true ] || [ "$NEEDS_WANDB" = true ]; then
+    echo "Run these commands to authenticate:"
+    if [ "$NEEDS_GH" = true ]; then
+        echo "  gh auth login                             # GitHub"
+    fi
+    if [ "$NEEDS_HF" = true ]; then
+        echo "  hf auth login                             # Hugging Face"
+    fi
+    if [ "$NEEDS_WANDB" = true ]; then
+        echo "  wandb login                               # Weights & Biases"
+    fi
+else
+    echo "✅ All AI/ML CLI tools are authenticated."
+fi
 echo ""
 
 {{ else if eq .chezmoi.os "darwin" -}}
@@ -222,10 +254,42 @@ fi
 echo ""
 echo "🔐 Authentication Setup"
 echo "======================="
-echo "Run these commands to authenticate:"
-echo "  gh auth login                             # GitHub"
-echo "  hf auth login                             # Hugging Face"
-echo "  wandb login                               # Weights & Biases"
+NEEDS_GH=false
+NEEDS_HF=false
+NEEDS_WANDB=false
+if command -v gh >/dev/null 2>&1; then
+    if ! gh auth status >/dev/null 2>&1; then
+        NEEDS_GH=true
+    fi
+fi
+if command -v hf >/dev/null 2>&1; then
+    if ! hf auth whoami >/dev/null 2>&1; then
+        NEEDS_HF=true
+    fi
+fi
+if command -v wandb >/dev/null 2>&1; then
+    if [ -f ~/.netrc ] && grep -q "api.wandb.ai" ~/.netrc 2>/dev/null; then
+        :
+    elif [ -f ~/.config/wandb/settings ] && grep -q "api_key" ~/.config/wandb/settings 2>/dev/null; then
+        :
+    else
+        NEEDS_WANDB=true
+    fi
+fi
+if [ "$NEEDS_GH" = true ] || [ "$NEEDS_HF" = true ] || [ "$NEEDS_WANDB" = true ]; then
+    echo "Run these commands to authenticate:"
+    if [ "$NEEDS_GH" = true ]; then
+        echo "  gh auth login                             # GitHub"
+    fi
+    if [ "$NEEDS_HF" = true ]; then
+        echo "  hf auth login                             # Hugging Face"
+    fi
+    if [ "$NEEDS_WANDB" = true ]; then
+        echo "  wandb login                               # Weights & Biases"
+    fi
+else
+    echo "✅ All AI/ML CLI tools are authenticated."
+fi
 echo ""
 
 {{ end -}}
