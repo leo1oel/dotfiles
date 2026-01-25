@@ -1,0 +1,15 @@
+# Auto-start fish for SSH interactive bash sessions
+if [ -n "$BASH_VERSION" ]; then
+  case $- in
+    *i*) ;;
+    *) return ;;
+  esac
+
+  if [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_TTY" ]; then
+    if command -v fish >/dev/null 2>&1; then
+      if [ -z "$FISH_VERSION" ]; then
+        exec fish
+      fi
+    fi
+  fi
+fi
