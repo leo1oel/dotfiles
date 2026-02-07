@@ -58,10 +58,17 @@ return {
   },
   {
     "folke/snacks.nvim",
-    opts = {
-      explorer = {
-        enabled = false,
-      },
+    keys = {
+      { "<leader>e", false },
+      { "<leader>E", false },
     },
+    opts = function(_, opts)
+      opts.explorer = opts.explorer or {}
+      opts.explorer.enabled = false
+
+      opts.picker = opts.picker or {}
+      opts.picker.sources = opts.picker.sources or {}
+      opts.picker.sources.explorer = nil
+    end,
   },
 }
