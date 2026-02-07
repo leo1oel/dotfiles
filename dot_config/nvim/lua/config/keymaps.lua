@@ -18,3 +18,13 @@ end
 vim.keymap.set("n", "V", function()
   open_popup("lazygit")
 end, { desc = "LazyGit (Popup)" })
+
+vim.keymap.set("n", "<leader>tv", function()
+  vim.cmd("vsplit | terminal")
+  vim.cmd("startinsert")
+end, { desc = "Terminal Right" })
+
+vim.keymap.set("n", "<leader>th", function()
+  vim.cmd("split | terminal")
+  vim.cmd("startinsert")
+end, { desc = "Terminal Bottom" })
