@@ -6,7 +6,7 @@ This repository manages personal dotfiles with `chezmoi` for macOS and Ubuntu.
 - Root templates: `dot_*` and `private_dot_*` map to files under `$HOME`.
 - App config: `dot_config/` (Fish, Neovim, Nix, Starship, package manifests).
 - Automation scripts: `.chezmoiscripts/` (`run_once_*` and `run_onchange_*` lifecycle hooks).
-- Helper binaries: `bin/` and `private_dot_local/bin/`.
+- Helper scripts: `private_dot_local/bin/`.
 
 Keep changes in the source tree here, then apply with `chezmoi` instead of editing generated files in `$HOME`.
 

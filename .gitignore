@@ -23,6 +23,7 @@ Thumbs.db
 
 # Chezmoi Runtime Files
 # Note: .chezmoiscripts/ should be tracked as they contain installation logic
+bin/chezmoi
 
 # Environment Files
 .env
