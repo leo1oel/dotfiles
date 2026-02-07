@@ -48,15 +48,20 @@ function yn --description "Open left yazi and right nvim in tmux"
         tmux new-session -d -s "$session" -c "$target" "yazi ."
     end
 
-    tmux list-windows -t "$session" >/dev/null 2>&1 || tmux new-window -t "$session" -n main -c "$target" "yazi ."
-    tmux respawn-pane -k -t "$session":0.0 -c "$target" "yazi ."
-    if test (tmux list-panes -t "$session":0 | wc -l | string trim) -lt 2
-        tmux split-window -h -t "$session":0 -c "$target" "nvim ."
-    else
-        tmux respawn-pane -k -t "$session":0.1 -c "$target" "nvim ."
+    set -l win_index (tmux list-windows -t "$session" -F "#{window_index}" 2>/dev/null | head -n1)
+    if test -z "$win_index"
+        tmux new-window -t "$session" -n main -c "$target" "yazi ."
+        set win_index (tmux list-windows -t "$session" -F "#{window_index}" | head -n1)
     end
-    tmux select-layout -t "$session":0 even-horizontal >/dev/null 2>&1
-    tmux select-pane -t "$session":0.0
+
+    tmux respawn-pane -k -t "$session":"$win_index".0 -c "$target" "yazi ."
+    if test (tmux list-panes -t "$session":"$win_index" | wc -l | string trim) -lt 2
+        tmux split-window -h -t "$session":"$win_index" -c "$target" "nvim ."
+    else
+        tmux respawn-pane -k -t "$session":"$win_index".1 -c "$target" "nvim ."
+    end
+    tmux select-layout -t "$session":"$win_index" even-horizontal >/dev/null 2>&1
+    tmux select-pane -t "$session":"$win_index".0
 
     if test "$in_tmux" = true
         return
