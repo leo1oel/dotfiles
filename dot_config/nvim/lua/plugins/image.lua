@@ -1,6 +1,6 @@
 return {
   "3rd/image.nvim",
-  enabled = true,
+  enabled = false,
   dependencies = {
     {
       "nvim-treesitter/nvim-treesitter",

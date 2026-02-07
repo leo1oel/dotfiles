@@ -7,6 +7,7 @@ LICENSE
 
 # Lock files
 .config/nvim/lazy-lock.json
+.config/nvim/lazyvim.json
 
 # Machine-specific files
 .gitconfig.local
@@ -30,4 +31,3 @@ LICENSE
 {{ if ne .chezmoi.os "linux" }}
 .config/packages.ubuntu
 {{ end }}
-
