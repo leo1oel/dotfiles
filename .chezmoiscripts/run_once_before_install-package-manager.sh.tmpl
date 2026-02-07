@@ -325,6 +325,66 @@ if ! command -v uv >/dev/null 2>&1; then
 fi
 
 #################
+# Neovim (ensure >= 0.8 for LazyVim)
+#################
+NEEDS_NVIM_INSTALL=true
+if command -v nvim >/dev/null 2>&1; then
+    NVIM_VERSION_LINE=$(nvim --version 2>/dev/null | head -n1)
+    NVIM_VERSION_MAJOR=$(echo "$NVIM_VERSION_LINE" | sed -E 's/.*v([0-9]+)\.([0-9]+).*/\1/')
+    NVIM_VERSION_MINOR=$(echo "$NVIM_VERSION_LINE" | sed -E 's/.*v([0-9]+)\.([0-9]+).*/\2/')
+    if [ -n "$NVIM_VERSION_MAJOR" ] && [ -n "$NVIM_VERSION_MINOR" ]; then
+        if [ "$NVIM_VERSION_MAJOR" -gt 0 ] || [ "$NVIM_VERSION_MINOR" -ge 8 ]; then
+            NEEDS_NVIM_INSTALL=false
+            echo "✅ Neovim ${NVIM_VERSION_MAJOR}.${NVIM_VERSION_MINOR} already meets minimum version"
+        else
+            echo "⚠️  Neovim ${NVIM_VERSION_MAJOR}.${NVIM_VERSION_MINOR} is too old (< 0.8)"
+        fi
+    fi
+fi
+
+if [ "$NEEDS_NVIM_INSTALL" = true ]; then
+    echo "📦 Installing newer Neovim from GitHub release..."
+    mkdir -p "$HOME/.local/bin" "$HOME/.local/opt"
+
+    ARCH=$(uname -m)
+    NVIM_ASSET=""
+    if [ "$ARCH" = "x86_64" ]; then
+        NVIM_ASSET="nvim-linux-x86_64.tar.gz"
+    elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+        NVIM_ASSET="nvim-linux-arm64.tar.gz"
+    else
+        echo "⚠️  Unsupported architecture for automatic Neovim install: $ARCH"
+    fi
+
+    if [ -n "$NVIM_ASSET" ]; then
+        NVIM_URL="https://github.com/neovim/neovim/releases/latest/download/${NVIM_ASSET}"
+        if ! curl -fL "$NVIM_URL" -o /tmp/nvim.tar.gz; then
+            if [ "$ARCH" = "x86_64" ]; then
+                NVIM_URL="https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz"
+                curl -fL "$NVIM_URL" -o /tmp/nvim.tar.gz || true
+            fi
+        fi
+
+        if [ -s /tmp/nvim.tar.gz ]; then
+            rm -rf /tmp/nvim-linux* /tmp/nvim.appimage
+            tar -xzf /tmp/nvim.tar.gz -C /tmp
+            NVIM_DIR=$(find /tmp -maxdepth 1 -type d -name "nvim-linux*" | head -n1)
+            if [ -n "$NVIM_DIR" ] && [ -x "$NVIM_DIR/bin/nvim" ]; then
+                rm -rf "$HOME/.local/opt/nvim"
+                mv "$NVIM_DIR" "$HOME/.local/opt/nvim"
+                ln -sf "$HOME/.local/opt/nvim/bin/nvim" "$HOME/.local/bin/nvim"
+                echo "✅ Neovim installed to ~/.local/bin/nvim"
+            else
+                echo "⚠️  Failed to extract a valid Neovim binary from archive"
+            fi
+            rm -f /tmp/nvim.tar.gz
+        else
+            echo "⚠️  Could not download Neovim release asset"
+        fi
+    fi
+fi
+
+#################
 # eza (better ls)
 #################
 if ! command -v eza >/dev/null 2>&1; then

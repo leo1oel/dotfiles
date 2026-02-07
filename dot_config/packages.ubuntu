@@ -36,7 +36,7 @@ fzf
 # ===========================================
 # Editors
 # ===========================================
-neovim
+# neovim - installed/updated by run_once script to ensure >= 0.8 for LazyVim
 vim
 nano
 
