@@ -19,8 +19,6 @@ vim.keymap.set("n", "V", function()
   open_popup("lazygit")
 end, { desc = "LazyGit (Popup)" })
 
-vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle left reveal filesystem<cr>", { desc = "Explorer (Neo-tree)" })
-
 vim.keymap.set("n", "<leader>tv", function()
   vim.cmd("vsplit | terminal")
   vim.cmd("startinsert")
