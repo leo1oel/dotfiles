@@ -39,19 +39,27 @@ function yn --description "Open left yazi and right nvim in tmux"
         end
     end
 
+    set -l session "yn"
     if test "$in_tmux" = true
-        tmux split-window -h -c "$target" "nvim ."
-        tmux select-pane -L
-        yazi "$target"
-        return
+        set session (tmux display-message -p "#S")
     end
 
-    set -l session "yn"
     if not tmux has-session -t "$session" 2>/dev/null
         tmux new-session -d -s "$session" -c "$target" "yazi ."
-        tmux split-window -h -t "$session":0 -c "$target" "nvim ."
-        tmux select-pane -t "$session":0.0
     end
 
+    tmux list-windows -t "$session" >/dev/null 2>&1 || tmux new-window -t "$session" -n main -c "$target" "yazi ."
+    tmux respawn-pane -k -t "$session":0.0 -c "$target" "yazi ."
+    if test (tmux list-panes -t "$session":0 | wc -l | string trim) -lt 2
+        tmux split-window -h -t "$session":0 -c "$target" "nvim ."
+    else
+        tmux respawn-pane -k -t "$session":0.1 -c "$target" "nvim ."
+    end
+    tmux select-layout -t "$session":0 even-horizontal >/dev/null 2>&1
+    tmux select-pane -t "$session":0.0
+
+    if test "$in_tmux" = true
+        return
+    end
     tmux attach -t "$session"
 end

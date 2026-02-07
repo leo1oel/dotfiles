@@ -28,12 +28,25 @@ end
 set_python_host()
 if vim.api.nvim_create_autocmd then
   vim.api.nvim_create_autocmd("DirChanged", { callback = set_python_host })
+  vim.api.nvim_create_autocmd({ "VimEnter", "WinEnter", "BufEnter" }, {
+    callback = function()
+      if vim.bo.buftype == "" and vim.fn.mode() ~= "i" then
+        vim.cmd("startinsert")
+      end
+    end,
+  })
 else
   _G.__set_python_host = set_python_host
   vim.cmd([[
     augroup dotfiles_python_host
       autocmd!
       autocmd DirChanged * lua __set_python_host()
+    augroup END
+  ]])
+  vim.cmd([[
+    augroup dotfiles_cursor_mode
+      autocmd!
+      autocmd VimEnter,BufEnter,WinEnter * if &buftype == '' | startinsert | endif
     augroup END
   ]])
 end
