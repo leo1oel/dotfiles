@@ -30,7 +30,16 @@ function yn --description "Open left yazi and right nvim in tmux"
     end
     set -lx TERM "$requested_term"
 
+    tmux set-option -g default-terminal "$requested_term" >/dev/null 2>&1
+
+    set -l in_tmux false
     if set -q TMUX
+        if tmux display-message -p "#S" >/dev/null 2>&1
+            set in_tmux true
+        end
+    end
+
+    if test "$in_tmux" = true
         tmux split-window -h -c "$target" "nvim ."
         tmux select-pane -L
         yazi "$target"
