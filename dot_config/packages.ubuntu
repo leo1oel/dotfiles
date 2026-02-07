@@ -127,6 +127,7 @@ shellcheck
 tldr
 man-db
 info
+imagemagick
 # fastfetch - installed via PPA or download in run_once script
 neofetch
 figlet
