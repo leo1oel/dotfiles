@@ -18,7 +18,6 @@ brew "fish-lsp"
 brew "fisher"
 brew "starship"
 brew "tmux"
-brew "zellij"
 
 # ===========================================
 # Modern CLI Tools

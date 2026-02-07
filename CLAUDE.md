@@ -106,7 +106,7 @@ Secrets are managed using `pass` (password-store):
    - **Via PPA**: helix, lazygit
    - **Via curl installer**: starship, uv, fnm
    - **Via custom repo**: eza
-   - **Via GitHub releases**: git-delta, zellij
+   - **Via GitHub releases**: git-delta, yazi
    - **Symlinked**: bat (from batcat), fd (from fdfind)
 
 **Nix packages** (cross-platform):
@@ -137,9 +137,8 @@ Fish configs in `conf.d/` are loaded in numerical order:
 - `95_*` - Local overrides and SSH
 
 **Common aliases** (from `90_aliases.fish`):
-- `vi`, `nano` → `nvim`
-- `zz` → `zellij`
-- `cz` → `chezmoi`
+- `vi` → `nvim`
+- `y` → `yazi`
 
 ### GenAI Integration
 
@@ -165,7 +164,7 @@ This repository configures multiple development environments:
 - `fnm` (Fast Node Manager)
 - Alternative: `nvm` function wrapper
 
-**Note:** This configuration uses many modern CLI tools written in Rust (ripgrep, bat, eza, fd, starship, helix, zoxide, zellij) but does **not** include Rust development environment. These tools are installed as pre-compiled binaries via package managers.
+**Note:** This configuration uses many modern CLI tools written in Rust (ripgrep, bat, eza, fd, starship, helix, zoxide, yazi) but does **not** include Rust development environment. These tools are installed as pre-compiled binaries via package managers.
 
 **All environments** include LSPs and formatters configured for Helix and Neovim.
 
@@ -179,7 +178,7 @@ This repository configures multiple development environments:
      - Installs Fish shell from PPA
      - Adds PPAs for Helix and LazyGit
      - Installs tools via curl: Starship, uv, fnm
-     - Installs eza (from custom repo), git-delta, zellij, chezmoi
+     - Installs eza (from custom repo), git-delta, yazi, chezmoi
      - Creates symlinks for `bat` (batcat) and `fd` (fdfind)
    - Sets Fish as default shell on both platforms
 

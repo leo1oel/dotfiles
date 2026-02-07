@@ -24,9 +24,6 @@ alias gaa="git add --all"
 alias gcmsg="git commit -m"
 alias gp="git push"
 
-if type -q zellij
-    alias zz=zellij
-    alias zl="zellij list-sessions"
-    alias za="zellij attach"
-    alias zac="zellij attach --create"
+if type -q yazi
+    alias y=yazi
 end

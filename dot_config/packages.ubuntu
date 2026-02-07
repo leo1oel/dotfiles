@@ -31,7 +31,7 @@ fd-find
 fzf
 # zoxide - installed via GitHub release in run_once script (not in Ubuntu 20.04 repos)
 # eza - better ls (requires custom repo, installed in run_once script)
-# zellij - terminal multiplexer (not in apt, will be installed via cargo/download)
+# yazi - terminal file manager (not in apt for older Ubuntu, installed via GitHub release)
 
 # ===========================================
 # Editors
@@ -173,7 +173,7 @@ tk-dev
 # - lazygit (via GitHub release download)
 # - git-delta (via GitHub release download)
 # - chezmoi (via curl installer)
-# - zellij (via GitHub release download)
+# - yazi (via GitHub release download)
 #
 # Python tools (install via uv tool after setup):
 # - poetry, black, ruff, pyright, etc.

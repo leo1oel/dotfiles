@@ -40,6 +40,15 @@ else
 fi
 
 #################
+# yazi (terminal file manager)
+#################
+if ! command -v yazi >/dev/null 2>&1; then
+    echo "📦 Installing yazi..."
+    brew install yazi
+    echo "✅ yazi installed via Homebrew"
+fi
+
+#################
 # Oh My Tmux
 #################
 OHMY_TMUX_BASE="${XDG_CONFIG_HOME:-$HOME/.config}/tmux"
@@ -442,18 +451,41 @@ if [ -f "$HOME/.local/bin/fastfetch" ]; then
 fi
 
 #################
-# zellij (terminal multiplexer)
+# yazi (terminal file manager)
 #################
-if ! command -v zellij >/dev/null 2>&1; then
-    echo "📦 Installing zellij..."
+if ! command -v yazi >/dev/null 2>&1; then
+    echo "📦 Installing yazi..."
     mkdir -p "$HOME/.local/bin"
-    ZELLIJ_VERSION=$(curl -s https://api.github.com/repos/zellij-org/zellij/releases/latest | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
-    wget "https://github.com/zellij-org/zellij/releases/download/${ZELLIJ_VERSION}/zellij-x86_64-unknown-linux-musl.tar.gz" -O /tmp/zellij.tar.gz
-    tar -xzf /tmp/zellij.tar.gz -C /tmp
-    mv /tmp/zellij "$HOME/.local/bin/"
-    chmod +x "$HOME/.local/bin/zellij"
-    rm /tmp/zellij.tar.gz
-    echo "✅ zellij installed to ~/.local/bin"
+    YAZI_VERSION=$(curl -s https://api.github.com/repos/sxyazi/yazi/releases/latest | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+    if [ -n "$YAZI_VERSION" ]; then
+        YAZI_BASE_URL="https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}"
+        if wget -q "${YAZI_BASE_URL}/yazi-x86_64-unknown-linux-musl.zip" -O /tmp/yazi.zip; then
+            :
+        elif wget -q "${YAZI_BASE_URL}/yazi-x86_64-unknown-linux-gnu.zip" -O /tmp/yazi.zip; then
+            :
+        else
+            echo "⚠️  Could not download yazi release assets from ${YAZI_BASE_URL}"
+            rm -f /tmp/yazi.zip
+        fi
+        if [ -s /tmp/yazi.zip ]; then
+            rm -rf /tmp/yazi
+            mkdir -p /tmp/yazi
+            unzip -o /tmp/yazi.zip -d /tmp/yazi >/dev/null 2>&1
+            YAZI_BIN=$(find /tmp/yazi -type f -name yazi | head -n1)
+            YA_BIN=$(find /tmp/yazi -type f -name ya | head -n1)
+            if [ -n "$YAZI_BIN" ] && [ -n "$YA_BIN" ]; then
+                mv "$YAZI_BIN" "$HOME/.local/bin/yazi"
+                mv "$YA_BIN" "$HOME/.local/bin/ya"
+                chmod +x "$HOME/.local/bin/yazi" "$HOME/.local/bin/ya"
+                echo "✅ yazi installed to ~/.local/bin"
+            else
+                echo "⚠️  yazi archive extracted, but binaries were not found"
+            fi
+            rm -rf /tmp/yazi /tmp/yazi.zip
+        fi
+    else
+        echo "⚠️  Could not determine yazi version (GitHub API may be rate-limited). Skipping."
+    fi
 fi
 
 #################
