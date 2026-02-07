@@ -629,22 +629,44 @@ fi
 if ! command -v wt >/dev/null 2>&1; then
     echo "📦 Installing worktrunk (wt)..."
 
-    # worktrunk is distributed as a Rust crate
-    if ! command -v cargo >/dev/null 2>&1; then
-        if [ "$HAS_SUDO" = true ]; then
-            echo "📦 Installing cargo (required by worktrunk)..."
-            sudo apt install -y cargo
-        else
-            echo "⚠️  cargo is not installed and sudo is unavailable. Skipping worktrunk."
+    # worktrunk is distributed as a Rust crate and requires a modern rustc.
+    ensure_modern_rust=false
+    if command -v rustc >/dev/null 2>&1; then
+        RUSTC_VERSION=$(rustc --version 2>/dev/null | awk '{print $2}')
+        if [ -n "$RUSTC_VERSION" ] && [ "$(printf '%s\n' "1.89.0" "$RUSTC_VERSION" | sort -V | head -n1)" = "1.89.0" ]; then
+            ensure_modern_rust=true
+        fi
+    fi
+
+    # If rust toolchain is too old (common on Ubuntu apt), install rustup stable.
+    if [ "$ensure_modern_rust" = false ] || ! command -v cargo >/dev/null 2>&1; then
+        if ! command -v rustup >/dev/null 2>&1; then
+            echo "📦 Installing rustup (required by worktrunk)..."
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain stable
+        fi
+
+        if [ -f "$HOME/.cargo/env" ]; then
+            # shellcheck source=/dev/null
+            . "$HOME/.cargo/env"
+        fi
+        export PATH="$HOME/.cargo/bin:$PATH"
+
+        if command -v rustup >/dev/null 2>&1; then
+            rustup toolchain install stable --profile minimal >/dev/null 2>&1 || true
+            rustup default stable >/dev/null 2>&1 || true
         fi
     fi
 
     if command -v cargo >/dev/null 2>&1; then
         if cargo install worktrunk; then
             echo "✅ worktrunk installed (wt)"
+        elif cargo install worktrunk --version 0.1.5; then
+            echo "✅ worktrunk 0.1.5 installed as fallback (older rustc compatibility)"
         else
             echo "⚠️  worktrunk installation failed via cargo"
         fi
+    else
+        echo "⚠️  cargo is unavailable. Skipping worktrunk."
     fi
 else
     echo "✅ worktrunk is already installed"
