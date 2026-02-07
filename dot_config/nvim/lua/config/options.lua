@@ -10,7 +10,7 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.signcolumn = "yes"
 vim.opt.cursorline = true
-vim.opt.guicursor = "n-v-c-sm-i-ci-ve-r-cr-o:ver25"
+vim.opt.guicursor = "n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50"
 
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
