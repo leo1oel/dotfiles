@@ -15,10 +15,6 @@ local function open_popup(cmd)
   vim.cmd("botright split | terminal " .. cmd)
 end
 
-vim.keymap.set("n", "F", function()
-  open_popup("yazi")
-end, { desc = "Yazi (Popup)" })
-
 vim.keymap.set("n", "V", function()
   open_popup("lazygit")
 end, { desc = "LazyGit (Popup)" })
