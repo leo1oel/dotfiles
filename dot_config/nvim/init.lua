@@ -26,7 +26,17 @@ local function set_python_host()
 end
 
 set_python_host()
-vim.api.nvim_create_autocmd("DirChanged", { callback = set_python_host })
+if vim.api.nvim_create_autocmd then
+  vim.api.nvim_create_autocmd("DirChanged", { callback = set_python_host })
+else
+  _G.__set_python_host = set_python_host
+  vim.cmd([[
+    augroup dotfiles_python_host
+      autocmd!
+      autocmd DirChanged * lua __set_python_host()
+    augroup END
+  ]])
+end
 
 -- bootstrap lazy.nvim, LazyVim and your plugins
 require("config.lazy")
