@@ -14,6 +14,22 @@ function yn --description "Open left yazi and right nvim in tmux"
         return 1
     end
 
+    set -l requested_term "$TERM"
+    if test -z "$requested_term"
+        set requested_term "xterm-256color"
+    end
+
+    if not infocmp "$requested_term" >/dev/null 2>&1
+        for fallback in xterm-256color screen-256color xterm
+            if infocmp "$fallback" >/dev/null 2>&1
+                set requested_term "$fallback"
+                break
+            end
+        end
+        echo "yn: TERM '$TERM' not supported here, using '$requested_term'"
+    end
+    set -lx TERM "$requested_term"
+
     if set -q TMUX
         tmux split-window -h -c "$target" "nvim ."
         tmux select-pane -L
