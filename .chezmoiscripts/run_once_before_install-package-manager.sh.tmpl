@@ -69,6 +69,9 @@ echo "✅ Oh My Tmux installed to $OHMY_TMUX_BASE"
 
 echo "🐧 Setting up Linux environment..."
 
+# Ensure user-local tool paths are available in this script run
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+
 # Check if we have sudo privileges
 HAS_SUDO=false
 if sudo -n true 2>/dev/null; then
@@ -618,6 +621,33 @@ if ! command -v bw >/dev/null 2>&1; then
     rm -rf /tmp/bw /tmp/bw.zip
     echo "✅ Bitwarden CLI installed to ~/.local/bin"
     fi
+fi
+
+#################
+# worktrunk (wt)
+#################
+if ! command -v wt >/dev/null 2>&1; then
+    echo "📦 Installing worktrunk (wt)..."
+
+    # worktrunk is distributed as a Rust crate
+    if ! command -v cargo >/dev/null 2>&1; then
+        if [ "$HAS_SUDO" = true ]; then
+            echo "📦 Installing cargo (required by worktrunk)..."
+            sudo apt install -y cargo
+        else
+            echo "⚠️  cargo is not installed and sudo is unavailable. Skipping worktrunk."
+        fi
+    fi
+
+    if command -v cargo >/dev/null 2>&1; then
+        if cargo install worktrunk; then
+            echo "✅ worktrunk installed (wt)"
+        else
+            echo "⚠️  worktrunk installation failed via cargo"
+        fi
+    fi
+else
+    echo "✅ worktrunk is already installed"
 fi
 
 #################
