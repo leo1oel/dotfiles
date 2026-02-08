@@ -52,15 +52,9 @@ fi
 # Oh My Tmux
 #################
 OHMY_TMUX_BASE="${XDG_CONFIG_HOME:-$HOME/.config}/tmux"
-OHMY_TMUX_DIR="$OHMY_TMUX_BASE/oh-my-tmux"
-echo "📦 Installing Oh My Tmux (force overwrite)..."
-rm -f "$OHMY_TMUX_BASE/tmux.conf" "$OHMY_TMUX_BASE/tmux.conf.local" "$HOME/.tmux.conf"
-rm -rf "$OHMY_TMUX_DIR"
+echo "📦 Preparing tmux config paths..."
 mkdir -p "$OHMY_TMUX_BASE"
-git clone --single-branch https://github.com/gpakosz/.tmux.git "$OHMY_TMUX_DIR"
-ln -sf "$OHMY_TMUX_DIR/.tmux.conf" "$OHMY_TMUX_BASE/tmux.conf"
-cp -f "$OHMY_TMUX_DIR/.tmux.conf.local" "$OHMY_TMUX_BASE/tmux.conf.local"
-echo "✅ Oh My Tmux installed to $OHMY_TMUX_BASE"
+echo "✅ tmux config is managed by this dotfiles repo (no external clone)."
 
 {{ else if eq .chezmoi.os "linux" -}}
 #################
@@ -676,15 +670,9 @@ fi
 # Oh My Tmux
 #################
 OHMY_TMUX_BASE="${XDG_CONFIG_HOME:-$HOME/.config}/tmux"
-OHMY_TMUX_DIR="$OHMY_TMUX_BASE/oh-my-tmux"
-echo "📦 Installing Oh My Tmux (force overwrite)..."
-rm -f "$OHMY_TMUX_BASE/tmux.conf" "$OHMY_TMUX_BASE/tmux.conf.local" "$HOME/.tmux.conf"
-rm -rf "$OHMY_TMUX_DIR"
+echo "📦 Preparing tmux config paths..."
 mkdir -p "$OHMY_TMUX_BASE"
-git clone --single-branch https://github.com/gpakosz/.tmux.git "$OHMY_TMUX_DIR"
-ln -sf "$OHMY_TMUX_DIR/.tmux.conf" "$OHMY_TMUX_BASE/tmux.conf"
-cp -f "$OHMY_TMUX_DIR/.tmux.conf.local" "$OHMY_TMUX_BASE/tmux.conf.local"
-echo "✅ Oh My Tmux installed to $OHMY_TMUX_BASE"
+echo "✅ tmux config is managed by this dotfiles repo (no external clone)."
 
 #################
 # Create symlinks for renamed commands

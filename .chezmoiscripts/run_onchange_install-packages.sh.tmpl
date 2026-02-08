@@ -20,6 +20,94 @@ fi
 # Ubuntu packages hash: {{ include "dot_config/packages.ubuntu" | sha256sum }}
 # RHEL/Rocky packages hash: {{ include "dot_config/packages.rhel" | sha256sum }}
 
+install_latest_tmux_local() {
+  local prefix="${HOME}/.local"
+  local build_dir="${HOME}/.cache/build-tmux"
+  local jobs
+  jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4)"
+
+  local required_cmds="curl tar make gcc pkg-config bison"
+  local missing=""
+  local cmd
+  for cmd in $required_cmds; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+      missing="${missing} ${cmd}"
+    fi
+  done
+
+  if [ -n "$missing" ]; then
+    echo "⚠️  Skipping local tmux install. Missing build tools:${missing}"
+    echo "   Ask admin to provide them, or load a compiler/toolchain module."
+    return 0
+  fi
+
+  mkdir -p "$prefix" "$prefix/bin" "$build_dir"
+
+  echo "📦 Resolving latest tmux release tag..."
+  local tmux_tag
+  tmux_tag="$(curl -fsSL https://api.github.com/repos/tmux/tmux/releases/latest | sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
+  if [ -z "$tmux_tag" ]; then
+    echo "⚠️  Could not determine latest tmux release tag. Skipping local install."
+    return 0
+  fi
+
+  local local_tmux_version=""
+  if [ -x "$prefix/bin/tmux" ]; then
+    local_tmux_version="$("$prefix/bin/tmux" -V 2>/dev/null | awk '{print $2}')"
+  fi
+
+  if [ "$local_tmux_version" = "$tmux_tag" ]; then
+    echo "✅ Local tmux is already latest (${local_tmux_version}) at $prefix/bin/tmux"
+    return 0
+  fi
+
+  cd "$build_dir" || return 1
+
+  local libevent_ver="2.1.12-stable"
+  if [ ! -f "$prefix/lib/pkgconfig/libevent.pc" ]; then
+    echo "🔧 Building libevent ${libevent_ver} in $prefix..."
+    if [ ! -d "libevent-${libevent_ver}" ]; then
+      curl -fL -o "libevent-${libevent_ver}.tar.gz" "https://github.com/libevent/libevent/releases/download/release-${libevent_ver}/libevent-${libevent_ver}.tar.gz"
+      tar -xzf "libevent-${libevent_ver}.tar.gz"
+    fi
+    cd "libevent-${libevent_ver}" || return 1
+    ./configure --prefix="$prefix" --disable-openssl
+    make -j"$jobs"
+    make install
+    cd "$build_dir" || return 1
+  fi
+
+  local ncurses_ver="6.5"
+  if [ ! -f "$prefix/lib/pkgconfig/ncursesw.pc" ]; then
+    echo "🔧 Building ncurses ${ncurses_ver} in $prefix..."
+    if [ ! -d "ncurses-${ncurses_ver}" ]; then
+      curl -fL -o "ncurses-${ncurses_ver}.tar.gz" "https://ftp.gnu.org/gnu/ncurses/ncurses-${ncurses_ver}.tar.gz"
+      tar -xzf "ncurses-${ncurses_ver}.tar.gz"
+    fi
+    cd "ncurses-${ncurses_ver}" || return 1
+    ./configure --prefix="$prefix" --with-shared --with-termlib --enable-pc-files --without-debug --without-ada --with-pkg-config-libdir="$prefix/lib/pkgconfig"
+    make -j"$jobs"
+    make install
+    cd "$build_dir" || return 1
+  fi
+
+  local tmux_src="tmux-${tmux_tag}"
+  echo "🔧 Building tmux ${tmux_tag} in $prefix..."
+  rm -rf "$tmux_src"
+  curl -fL -o "${tmux_src}.tar.gz" "https://github.com/tmux/tmux/releases/download/${tmux_tag}/${tmux_src}.tar.gz"
+  tar -xzf "${tmux_src}.tar.gz"
+
+  cd "$tmux_src" || return 1
+  PKG_CONFIG_PATH="$prefix/lib/pkgconfig" \
+    CPPFLAGS="-I$prefix/include" \
+    LDFLAGS="-L$prefix/lib -Wl,-rpath,$prefix/lib" \
+    ./configure --prefix="$prefix"
+  make -j"$jobs"
+  make install
+
+  echo "✅ Local tmux installed: $("$prefix/bin/tmux" -V) ($prefix/bin/tmux)"
+}
+
 HAS_SUDO=false
 if sudo -n true 2>/dev/null; then
   HAS_SUDO=true
@@ -28,6 +116,7 @@ fi
 if [ "$HAS_SUDO" != true ]; then
   echo "ℹ️  Skipping system package installation (no sudo privileges)"
   echo "   Packages should already be installed by system admin."
+  install_latest_tmux_local
 elif command -v apt >/dev/null 2>&1; then
     echo "📦 Updating Ubuntu packages via APT..."
 
