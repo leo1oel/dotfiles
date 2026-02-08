@@ -1,0 +1,119 @@
+# Rocky/RHEL package list
+# Used by .chezmoiscripts/run_onchange_install-packages.sh.tmpl when dnf/yum is available.
+
+# ===========================================
+# Repositories
+# ===========================================
+epel-release
+
+# ===========================================
+# Core Development Tools
+# ===========================================
+git
+gcc
+gcc-c++
+make
+curl
+wget
+cmake
+pkgconf-pkg-config
+ca-certificates
+gnupg2
+which
+tar
+gzip
+bzip2
+xz
+unzip
+zip
+
+# ===========================================
+# Shell & Terminal
+# ===========================================
+tmux
+
+# ===========================================
+# Modern CLI Tools
+# ===========================================
+ripgrep
+bat
+fd-find
+fzf
+
+# ===========================================
+# Editors
+# ===========================================
+vim-enhanced
+nano
+
+# ===========================================
+# Programming Languages & Runtimes
+# ===========================================
+python3
+python3-pip
+python3-devel
+
+# ===========================================
+# Development Tools
+# ===========================================
+jq
+tree
+ncdu
+httpie
+shellcheck
+
+# ===========================================
+# Network Tools
+# ===========================================
+net-tools
+bind-utils
+traceroute
+nmap-ncat
+openssh-clients
+openssh-server
+
+# ===========================================
+# File Tools & Archives
+# ===========================================
+p7zip
+p7zip-plugins
+rsync
+
+# ===========================================
+# Git Tools
+# ===========================================
+git-lfs
+tig
+
+# ===========================================
+# Misc Utilities
+# ===========================================
+man-db
+info
+imagemagick
+figlet
+
+# ===========================================
+# System Monitoring
+# ===========================================
+iotop
+sysstat
+lm_sensors
+
+# ===========================================
+# Build Dependencies
+# ===========================================
+autoconf
+automake
+libtool
+ninja-build
+meson
+openssl-devel
+readline-devel
+libffi-devel
+bzip2-devel
+xz-devel
+ncurses-devel
+sqlite-devel
+gdbm-devel
+tk-devel

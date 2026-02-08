@@ -18,15 +18,17 @@ fi
 
 {{ else if eq .chezmoi.os "linux" -}}
 # Ubuntu packages hash: {{ include "dot_config/packages.ubuntu" | sha256sum }}
+# RHEL/Rocky packages hash: {{ include "dot_config/packages.rhel" | sha256sum }}
 
-if command -v apt >/dev/null 2>&1; then
-  # Check if we have sudo privileges
-  HAS_SUDO=false
-  if sudo -n true 2>/dev/null; then
-      HAS_SUDO=true
-  fi
+HAS_SUDO=false
+if sudo -n true 2>/dev/null; then
+  HAS_SUDO=true
+fi
 
-  if [ "$HAS_SUDO" = true ]; then
+if [ "$HAS_SUDO" != true ]; then
+  echo "ℹ️  Skipping system package installation (no sudo privileges)"
+  echo "   Packages should already be installed by system admin."
+elif command -v apt >/dev/null 2>&1; then
     echo "📦 Updating Ubuntu packages via APT..."
 
     # Update package lists
@@ -43,14 +45,42 @@ if command -v apt >/dev/null 2>&1; then
     fi
 
     echo "✅ Package installation complete."
+elif command -v dnf >/dev/null 2>&1 || command -v yum >/dev/null 2>&1; then
+  PM="dnf"
+  if ! command -v dnf >/dev/null 2>&1; then
+    PM="yum"
+  fi
+
+  echo "📦 Updating RHEL/Rocky packages via $PM..."
+  sudo "$PM" makecache -y >/dev/null 2>&1 || true
+
+  # Package list embedded from packages.rhel (filtered at template time)
+  packages="{{ include "dot_config/packages.rhel" | replaceAllRegex "#.*" "" | replaceAllRegex "\n+" " " | trim }}"
+
+  if [ -n "$packages" ]; then
+    echo "Installing packages via $PM..."
+    installed_count=0
+    failed_packages=""
+
+    for pkg in $packages; do
+      if sudo "$PM" install -y "$pkg" >/dev/null 2>&1; then
+        installed_count=$((installed_count + 1))
+      else
+        failed_packages="$failed_packages $pkg"
+      fi
+    done
+
+    echo "✅ Installed/confirmed ${installed_count} packages via $PM."
+    if [ -n "$failed_packages" ]; then
+      echo "⚠️  Some packages could not be installed:$failed_packages"
+      echo "   This can happen if extra repos (like EPEL) are unavailable."
+    fi
   else
-    echo "ℹ️  Skipping system package installation (no sudo privileges)"
-    echo "   Packages should already be installed by system admin."
+    echo "⚠️  No packages found in packages.rhel"
   fi
 else
-  echo "🛑 APT package manager not found. Are you running Ubuntu/Debian?"
-  exit 1
+  echo "ℹ️  No supported Linux package manager found (apt/dnf/yum)."
+  echo "   Skipping system package installation."
 fi
 
 {{ end -}}
-
