@@ -423,12 +423,12 @@ bind m run "cut -c3- '#{TMUX_CONF}' | sh -s _toggle_mouse" \; display 'mouse #{?
 # by default, launching tmux will update tpm and all plugins
 #   - true (default)
 #   - false
-tmux_conf_update_plugins_on_launch=true
+tmux_conf_update_plugins_on_launch=false
 
 # by default, reloading the configuration will update tpm and all plugins
 #   - true (default)
 #   - false
-tmux_conf_update_plugins_on_reload=true
+tmux_conf_update_plugins_on_reload=false
 
 # by default, reloading the configuration will uninstall tpm and plugins when no
 # plugins are enabled
@@ -454,13 +454,6 @@ tmux_conf_uninstall_plugins_on_reload=true
 #set -g @continuum-restore 'on'
 set -g @plugin 'rose-pine/tmux'
 set -g @rose_pine_variant 'dawn'
-set -g @plugin 'tmux-plugins/tmux-sensible'
-set -g @plugin 'tmux-plugins/tmux-yank'
-set -g @plugin 'tmux-plugins/tmux-resurrect'
-set -g @plugin 'tmux-plugins/tmux-continuum'
-set -g @plugin 'christoomey/vim-tmux-navigator'
-set -g @continuum-restore 'on'
-set -g @resurrect-capture-pane-contents 'on'
 set -g @rose_pine_host 'on'
 set -g @rose_pine_user 'on'
 set -g @rose_pine_date_time '%H:%M'
