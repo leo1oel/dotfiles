@@ -50,8 +50,12 @@ fi
 # Hugging Face CLI (via uv tool)
 #################
 if ! command -v hf >/dev/null 2>&1; then
+    # Handle stale pipx/legacy symlink that blocks `uv tool install`.
+    if [ -L "$HOME/.local/bin/hf" ] && [ ! -e "$HOME/.local/bin/hf" ]; then
+        rm -f "$HOME/.local/bin/hf"
+    fi
     echo "📦 Installing Hugging Face CLI..."
-    uv tool install huggingface-hub
+    uv tool install --force huggingface-hub
     echo "✅ Hugging Face CLI installed"
 else
     echo "✅ Hugging Face CLI is already installed"
@@ -333,7 +337,7 @@ fi
 # Hugging Face CLI (via uv tool)
 if ! command -v hf >/dev/null 2>&1; then
     echo "📦 Installing Hugging Face CLI..."
-    uv tool install huggingface-hub
+    uv tool install --force huggingface-hub
 else
     echo "✅ Hugging Face CLI is already installed"
 fi
