@@ -69,6 +69,17 @@ else
 fi
 
 #################
+# gpustat (via uv tool)
+#################
+if ! command -v gpustat >/dev/null 2>&1; then
+    echo "📦 Installing gpustat..."
+    uv tool install gpustat
+    echo "✅ gpustat installed"
+else
+    echo "✅ gpustat is already installed"
+fi
+
+#################
 # Install fnm and Node.js LTS (required for Claude Code and Codex)
 #################
 # Install fnm if not present
