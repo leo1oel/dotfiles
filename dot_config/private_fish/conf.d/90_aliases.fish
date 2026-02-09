@@ -18,6 +18,7 @@ alias duu="du -d1 -h"
 
 alias vi=nvim
 alias nv=neovide
+alias wm='workmux'
 
 # Git aliases
 alias gaa="git add --all"
