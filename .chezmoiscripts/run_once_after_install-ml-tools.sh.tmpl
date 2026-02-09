@@ -155,6 +155,17 @@ else
 fi
 
 #################
+# OpenCommit (via npm)
+#################
+if ! command -v oco >/dev/null 2>&1; then
+    echo "📦 Installing OpenCommit..."
+    npm install -g opencommit
+    echo "✅ OpenCommit installed"
+else
+    echo "✅ OpenCommit is already installed"
+fi
+
+#################
 # Optional: Bitwarden-based CLI logins (gh, wandb, huggingface)
 #################
 if [ -t 0 ]; then
@@ -203,10 +214,12 @@ if [ -t 0 ]; then
                 BW_GH_ITEM=${BW_GH_ITEM:-"GitHub CLI Token"}
                 BW_WANDB_ITEM=${BW_WANDB_ITEM:-"W&B API Key"}
                 BW_HF_ITEM=${BW_HF_ITEM:-"Hugging Face Token"}
+                BW_AIBERM_ITEM=${BW_AIBERM_ITEM:-"AIBERM API Key"}
 
                 GH_TOKEN=$(bw get password "$BW_GH_ITEM" 2>/dev/null || true)
                 WANDB_API_KEY=$(bw get password "$BW_WANDB_ITEM" 2>/dev/null || true)
                 HF_TOKEN=$(bw get password "$BW_HF_ITEM" 2>/dev/null || true)
+                AIBERM_KEY=$(bw get password "$BW_AIBERM_ITEM" 2>/dev/null || true)
 
                 if [ -n "$GH_TOKEN" ] && command -v gh >/dev/null 2>&1; then
                     printf '%s' "$GH_TOKEN" | gh auth login --with-token >/dev/null 2>&1 && echo "✅ gh authenticated"
@@ -218,6 +231,25 @@ if [ -t 0 ]; then
 
                 if [ -n "$HF_TOKEN" ] && command -v huggingface-cli >/dev/null 2>&1; then
                     huggingface-cli login --token "$HF_TOKEN" >/dev/null 2>&1 && echo "✅ Hugging Face CLI authenticated"
+                fi
+
+                if [ -n "$AIBERM_KEY" ] && command -v oco >/dev/null 2>&1; then
+                    if oco config set \
+                        OCO_AI_PROVIDER=openai \
+                        OCO_API_KEY="$AIBERM_KEY" \
+                        OCO_API_URL=https://aiberm.com/v1 \
+                        OCO_MODEL=openai/gpt-4o-mini \
+                        OCO_EMOJI=true \
+                        OCO_DESCRIPTION=false >/dev/null 2>&1; then
+                        echo "✅ OpenCommit configured"
+                        if oco hook set >/dev/null 2>&1; then
+                            echo "✅ OpenCommit git hook enabled"
+                        else
+                            echo "⚠️  OpenCommit installed, but git hook setup failed (run: oco hook set)"
+                        fi
+                    else
+                        echo "⚠️  OpenCommit config failed (run: oco config set ... manually)"
+                    fi
                 fi
 
                 echo "ℹ️  Auto-login complete (missing tools or tokens are skipped)."
