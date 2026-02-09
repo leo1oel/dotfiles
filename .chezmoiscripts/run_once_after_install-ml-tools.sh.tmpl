@@ -65,8 +65,12 @@ fi
 # wandb (via uv tool)
 #################
 if ! command -v wandb >/dev/null 2>&1; then
+    # Handle stale pipx/legacy symlink that blocks `uv tool install`.
+    if [ -L "$HOME/.local/bin/wandb" ] && [ ! -e "$HOME/.local/bin/wandb" ]; then
+        rm -f "$HOME/.local/bin/wandb"
+    fi
     echo "📦 Installing wandb..."
-    uv tool install wandb
+    uv tool install --force wandb
     echo "✅ wandb installed"
 else
     echo "✅ wandb is already installed"
@@ -76,8 +80,12 @@ fi
 # gpustat (via uv tool)
 #################
 if ! command -v gpustat >/dev/null 2>&1; then
+    # Handle stale symlink from previous tool managers.
+    if [ -L "$HOME/.local/bin/gpustat" ] && [ ! -e "$HOME/.local/bin/gpustat" ]; then
+        rm -f "$HOME/.local/bin/gpustat"
+    fi
     echo "📦 Installing gpustat..."
-    uv tool install gpustat
+    uv tool install --force gpustat
     echo "✅ gpustat installed"
 else
     echo "✅ gpustat is already installed"
@@ -345,7 +353,7 @@ fi
 # wandb (via uv tool)
 if ! command -v wandb >/dev/null 2>&1; then
     echo "📦 Installing wandb..."
-    uv tool install wandb
+    uv tool install --force wandb
 else
     echo "✅ wandb is already installed"
 fi
