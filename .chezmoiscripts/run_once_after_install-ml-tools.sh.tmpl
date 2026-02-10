@@ -262,6 +262,8 @@ if [ -t 0 ]; then
                         OCO_API_KEY="$AIBERM_KEY" \
                         OCO_API_URL=https://aiberm.com/v1 \
                         OCO_MODEL=openai/gpt-4o-mini \
+                        OCO_TOKENS_MAX_INPUT=128000 \
+                        OCO_TOKENS_MAX_OUTPUT=1024 \
                         OCO_EMOJI=true \
                         OCO_DESCRIPTION=false >/dev/null 2>&1; then
                         echo "✅ OpenCommit configured"
