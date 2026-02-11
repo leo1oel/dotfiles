@@ -1,6 +1,12 @@
 {{- /* Git user config: username and email will be written to ~/.gitconfig for commit author info */ -}}
 {{ $username := promptString "Git username (shown as commit author)" -}}
 {{ $email := promptString "Git email (shown as commit author)" -}}
+{{- /* Optional Apptainer integration for Fish shell */ -}}
+{{ $apptainerEnabled := promptBool "Enable Apptainer Fish integration?" -}}
+{{ $apptainerRoot := "" -}}
+{{ if $apptainerEnabled -}}
+{{ $apptainerRoot = promptString "Apptainer env root directory (e.g. /path/to/envs)" -}}
+{{ end -}}
 
 [secret]
 command = "{{ env "HOME" }}/.local/bin/get-secret.sh"
@@ -11,6 +17,8 @@ options = ["missingkey=zero"]
 [data]
 username = {{ $username | quote }}
 email = {{ $email | quote }}
+apptainer_enabled = {{ $apptainerEnabled }}
+apptainer_envs_root = {{ $apptainerRoot | quote }}
 
 [hooks.read-source-state.pre]
 command = ".local/share/chezmoi/.install-password-manager.sh"

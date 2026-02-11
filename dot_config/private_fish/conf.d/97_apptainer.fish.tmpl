@@ -1,0 +1,106 @@
+{{ if .apptainer_enabled -}}
+# Apptainer environment activation (like conda activate for containers)
+set -g AP_ENVS_ROOT {{ .apptainer_envs_root | quote }}
+
+function ap-activate -a env_name -d "Activate an apptainer sandbox environment"
+    if test -z "$env_name"
+        echo "Usage: ap-activate <env_name>"
+        echo "Available:"
+        for d in $AP_ENVS_ROOT/*/
+            echo "  "(basename $d)
+        end
+        return 1
+    end
+
+    set -l env_path $AP_ENVS_ROOT/$env_name
+    if not test -d "$env_path"
+        echo "Not found: $env_path"
+        return 1
+    end
+
+    # Deactivate any existing environment first
+    if set -q APPTAINER_ENV
+        ap-deactivate
+    end
+
+    set -gx APPTAINER_ENV $env_name
+    set -g _AP_ENV_PATH $env_path
+
+    # Whitelist: add more as needed
+    set -g _AP_SIMPLE_CMDS \
+        python python3 ipython ipython3 \
+        torchrun accelerate accelerate-launch \
+        nvidia-smi
+
+    set -g _AP_SMART_CMDS pip pip3
+
+    set -g _AP_ALL_CMDS $_AP_SIMPLE_CMDS $_AP_SMART_CMDS
+
+    set -l count 0
+
+    # Read-only commands
+    for cmd in $_AP_SIMPLE_CMDS
+        if test -f "$env_path/usr/local/bin/$cmd" -o -f "$env_path/usr/bin/$cmd"
+            eval "function $cmd -d 'apptainer: $cmd'
+                apptainer exec --nv \$_AP_ENV_PATH $cmd \$argv
+            end"
+            set count (math $count + 1)
+        end
+    end
+
+    # pip/pip3: install/uninstall -> writable, otherwise read-only
+    for cmd in $_AP_SMART_CMDS
+        if test -f "$env_path/usr/local/bin/$cmd" -o -f "$env_path/usr/bin/$cmd"
+            eval "function $cmd -d 'apptainer: $cmd'
+                switch \$argv[1]
+                    case install uninstall
+                        apptainer exec --writable --fakeroot --nv \$_AP_ENV_PATH $cmd \$argv
+                    case '*'
+                        apptainer exec --nv \$_AP_ENV_PATH $cmd \$argv
+                end
+            end"
+            set count (math $count + 1)
+        end
+    end
+
+    echo "Activated: $env_name ($count commands wrapped)"
+end
+
+function ap-deactivate -d "Deactivate apptainer environment"
+    if not set -q APPTAINER_ENV
+        echo "No active environment."
+        return 1
+    end
+
+    for cmd in $_AP_ALL_CMDS
+        functions -e $cmd 2>/dev/null
+    end
+
+    set -l name $APPTAINER_ENV
+    set -e APPTAINER_ENV
+    set -e _AP_ENV_PATH
+    set -e _AP_SIMPLE_CMDS
+    set -e _AP_SMART_CMDS
+    set -e _AP_ALL_CMDS
+    echo "Deactivated: $name"
+end
+
+function ap-run -d "Run any command inside the active container"
+    if not set -q APPTAINER_ENV
+        echo "No active environment. Run: ap-activate <env>"
+        return 1
+    end
+    apptainer exec --nv $_AP_ENV_PATH $argv
+end
+
+function ap-shell -d "Open a writable shell inside the container (for maintenance)"
+    if not set -q APPTAINER_ENV
+        echo "No active environment. Run: ap-activate <env>"
+        return 1
+    end
+    echo "Entering writable shell. Type 'exit' to return."
+    apptainer shell --writable --fakeroot --nv $_AP_ENV_PATH
+end
+
+abbr -a workon ap-activate
+{{ end -}}

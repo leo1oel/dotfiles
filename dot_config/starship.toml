@@ -1,3 +1,7 @@
 
 command_timeout = 800
 
+[env_var.APPTAINER_ENV]
+symbol = "🔮 "
+style = "bold purple"
+format = "via [$symbol$env_value]($style) "
