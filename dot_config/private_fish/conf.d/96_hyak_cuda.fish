@@ -12,9 +12,17 @@ if status is-interactive
         if functions -q module
             set -l __hn (hostname)
             if string match -rq '^g[0-9]+$' -- $__hn
-                # Load GCC first; CUDA extension builds often need a newer host compiler.
-                module load gcc/11.2.0 2>/dev/null
-                module load cuda/12.4.1 2>/dev/null
+                # Load the newest available GCC; CUDA needs a newer host compiler.
+                set -l __gcc_ver (module avail gcc 2>&1 | string match -rga 'gcc/([0-9.]+)' | sort -t/ -k2 -V | tail -1)
+                if test -n "$__gcc_ver"
+                    module load $__gcc_ver 2>/dev/null
+                end
+
+                # After GCC is loaded, pick the newest CUDA that becomes available.
+                set -l __cuda_ver (module avail cuda 2>&1 | string match -rga 'cuda/([0-9.]+)' | sort -t/ -k2 -V | tail -1)
+                if test -n "$__cuda_ver"
+                    module load $__cuda_ver 2>/dev/null
+                end
 
                 if command -q gcc
                     set -gx CC (command -s gcc)

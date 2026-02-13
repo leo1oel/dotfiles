@@ -54,7 +54,7 @@ function ap-activate -a env_name -d "Activate an apptainer sandbox environment"
             eval "function $cmd -d 'apptainer: $cmd'
                 switch \$argv[1]
                     case install uninstall
-                        apptainer exec --writable --fakeroot --nv \$_AP_ENV_PATH $cmd \$argv
+                        apptainer exec --writable --fakeroot \$_AP_ENV_PATH $cmd \$argv
                     case '*'
                         apptainer exec --nv \$_AP_ENV_PATH $cmd \$argv
                 end
