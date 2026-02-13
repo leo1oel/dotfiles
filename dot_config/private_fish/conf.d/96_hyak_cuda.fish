@@ -14,14 +14,14 @@ if status is-interactive
         if functions -q module
             function cuda-init -d "Load the newest GCC and CUDA modules"
                 # Load the newest available GCC; CUDA needs a newer host compiler.
-                set -l __gcc_ver (module avail gcc 2>&1 | string match -rga 'gcc/([0-9.]+)' | sort -t/ -k2 -V | tail -1)
+                set -l __gcc_ver (module avail gcc 2>&1 | string match -ra 'gcc/[0-9.]+' | sort -t/ -k2 -V | tail -1)
                 if test -n "$__gcc_ver"
                     module load $__gcc_ver 2>/dev/null
                     echo "Loaded $__gcc_ver"
                 end
 
                 # After GCC is loaded, pick the newest CUDA that becomes available.
-                set -l __cuda_ver (module avail cuda 2>&1 | string match -rga 'cuda/([0-9.]+)' | sort -t/ -k2 -V | tail -1)
+                set -l __cuda_ver (module avail cuda 2>&1 | string match -ra 'cuda/[0-9.]+' | sort -t/ -k2 -V | tail -1)
                 if test -n "$__cuda_ver"
                     module load $__cuda_ver 2>/dev/null
                     echo "Loaded $__cuda_ver"
