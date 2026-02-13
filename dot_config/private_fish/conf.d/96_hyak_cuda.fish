@@ -3,25 +3,28 @@
 if status is-interactive
     if test (uname) = Linux
         if not functions -q module
-            if test -f /opt/ohpc/admin/lmod/lmod/init/fish
+            if test -f /usr/share/lmod/lmod/init/fish
+                source /usr/share/lmod/lmod/init/fish
+            else if test -f /opt/ohpc/admin/lmod/lmod/init/fish
                 source /opt/ohpc/admin/lmod/lmod/init/fish
             end
         end
 
-        # Auto-load compiler + CUDA toolkit on compute nodes only.
+        # Define cuda-init command to manually load GCC + CUDA on compute nodes.
         if functions -q module
-            set -l __hn (hostname)
-            if string match -rq '^g[0-9]+$' -- $__hn
+            function cuda-init -d "Load the newest GCC and CUDA modules"
                 # Load the newest available GCC; CUDA needs a newer host compiler.
                 set -l __gcc_ver (module avail gcc 2>&1 | string match -rga 'gcc/([0-9.]+)' | sort -t/ -k2 -V | tail -1)
                 if test -n "$__gcc_ver"
                     module load $__gcc_ver 2>/dev/null
+                    echo "Loaded $__gcc_ver"
                 end
 
                 # After GCC is loaded, pick the newest CUDA that becomes available.
                 set -l __cuda_ver (module avail cuda 2>&1 | string match -rga 'cuda/([0-9.]+)' | sort -t/ -k2 -V | tail -1)
                 if test -n "$__cuda_ver"
                     module load $__cuda_ver 2>/dev/null
+                    echo "Loaded $__cuda_ver"
                 end
 
                 if command -q gcc
