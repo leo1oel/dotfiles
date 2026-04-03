@@ -28,3 +28,7 @@ alias gp="git push"
 if type -q yazi
     alias y=yazi
 end
+
+if type -q claude
+    alias cc='claude --dangerously-skip-permissions'
+end

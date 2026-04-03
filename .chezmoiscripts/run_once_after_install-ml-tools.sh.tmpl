@@ -167,6 +167,43 @@ else
 fi
 
 #################
+# Claude Code Settings
+#################
+CLAUDE_SETTINGS="$HOME/.claude/settings.json"
+if [ ! -f "$CLAUDE_SETTINGS" ]; then
+    echo "⚙️  Configuring Claude Code settings..."
+    mkdir -p "$HOME/.claude"
+    cat > "$CLAUDE_SETTINGS" <<'SETTINGS_EOF'
+{
+  "env": {
+    "CLAUDE_CODE_NO_FLICKER": "1"
+  }
+}
+SETTINGS_EOF
+    echo "✅ Claude Code settings configured (NO_FLICKER enabled)"
+else
+    # Ensure CLAUDE_CODE_NO_FLICKER is set even if settings.json already exists
+    if ! grep -q "CLAUDE_CODE_NO_FLICKER" "$CLAUDE_SETTINGS" 2>/dev/null; then
+        echo "⚙️  Adding NO_FLICKER to existing Claude Code settings..."
+        if command -v python3 >/dev/null 2>&1; then
+            python3 -c "
+import json, sys
+with open('$CLAUDE_SETTINGS', 'r') as f:
+    data = json.load(f)
+data.setdefault('env', {})['CLAUDE_CODE_NO_FLICKER'] = '1'
+with open('$CLAUDE_SETTINGS', 'w') as f:
+    json.dump(data, f, indent=2)
+"
+            echo "✅ NO_FLICKER added to Claude Code settings"
+        else
+            echo "⚠️  python3 not found; please add CLAUDE_CODE_NO_FLICKER manually to $CLAUDE_SETTINGS"
+        fi
+    else
+        echo "✅ Claude Code settings already configured"
+    fi
+fi
+
+#################
 # OpenAI Codex (via npm)
 #################
 if ! command -v codex >/dev/null 2>&1; then
@@ -372,6 +409,40 @@ if ! command -v claude >/dev/null 2>&1; then
     npm install -g @anthropic-ai/claude-code
 else
     echo "✅ Claude Code is already installed"
+fi
+
+# Claude Code Settings
+CLAUDE_SETTINGS="$HOME/.claude/settings.json"
+if [ ! -f "$CLAUDE_SETTINGS" ]; then
+    echo "⚙️  Configuring Claude Code settings..."
+    mkdir -p "$HOME/.claude"
+    cat > "$CLAUDE_SETTINGS" <<'SETTINGS_EOF'
+{
+  "env": {
+    "CLAUDE_CODE_NO_FLICKER": "1"
+  }
+}
+SETTINGS_EOF
+    echo "✅ Claude Code settings configured (NO_FLICKER enabled)"
+else
+    if ! grep -q "CLAUDE_CODE_NO_FLICKER" "$CLAUDE_SETTINGS" 2>/dev/null; then
+        echo "⚙️  Adding NO_FLICKER to existing Claude Code settings..."
+        if command -v python3 >/dev/null 2>&1; then
+            python3 -c "
+import json, sys
+with open('$CLAUDE_SETTINGS', 'r') as f:
+    data = json.load(f)
+data.setdefault('env', {})['CLAUDE_CODE_NO_FLICKER'] = '1'
+with open('$CLAUDE_SETTINGS', 'w') as f:
+    json.dump(data, f, indent=2)
+"
+            echo "✅ NO_FLICKER added to Claude Code settings"
+        else
+            echo "⚠️  python3 not found; please add CLAUDE_CODE_NO_FLICKER manually to $CLAUDE_SETTINGS"
+        fi
+    else
+        echo "✅ Claude Code settings already configured"
+    fi
 fi
 
 # OpenAI Codex (via npm)
