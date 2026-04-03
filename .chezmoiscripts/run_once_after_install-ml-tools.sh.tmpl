@@ -264,8 +264,21 @@ if [ -t 0 ]; then
             fi
 
             if bw login --check >/dev/null 2>&1; then
-                echo "🔐 Enter Bitwarden master password to unlock (input hidden)"
-                BW_SESSION=$(bw unlock --raw || true)
+                BW_UNLOCK_ATTEMPTS=0
+                BW_MAX_ATTEMPTS=3
+                while [ $BW_UNLOCK_ATTEMPTS -lt $BW_MAX_ATTEMPTS ]; do
+                    BW_UNLOCK_ATTEMPTS=$((BW_UNLOCK_ATTEMPTS + 1))
+                    echo "🔐 Enter Bitwarden master password to unlock (attempt $BW_UNLOCK_ATTEMPTS/$BW_MAX_ATTEMPTS)"
+                    BW_SESSION=$(bw unlock --raw 2>/dev/null || true)
+                    if [ -n "$BW_SESSION" ]; then
+                        break
+                    fi
+                    if [ $BW_UNLOCK_ATTEMPTS -lt $BW_MAX_ATTEMPTS ]; then
+                        echo "❌ Invalid master password. Please try again."
+                    else
+                        echo "❌ Failed to unlock after $BW_MAX_ATTEMPTS attempts."
+                    fi
+                done
             fi
 
             if [ -n "$BW_SESSION" ]; then
