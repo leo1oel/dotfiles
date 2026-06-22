@@ -1,6 +1,11 @@
-# Repo Docs
+# Repo Docs (read from the repo, NOT deployed to $HOME)
 README.md
 LICENSE
+# Anchored with a leading "/" so it only ignores ~/CLAUDE.md (this repo's own
+# project-instructions doc) and does NOT touch ~/.claude/CLAUDE.md, which is a
+# managed symlink -> ~/AGENTS.md (see dot_claude/symlink_CLAUDE.md.tmpl).
+# NOTE: AGENTS.md is intentionally NOT ignored - it deploys to ~/AGENTS.md.
+/CLAUDE.md
 
 # Personal secrets
 .config/fish/fish_variables
