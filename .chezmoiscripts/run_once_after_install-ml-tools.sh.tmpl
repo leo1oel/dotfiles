@@ -160,7 +160,7 @@ echo "ℹ️  Note: Fish shell will use the new Node.js version on next login"
 #################
 if ! command -v claude >/dev/null 2>&1; then
     echo "📦 Installing Claude Code..."
-    npm install -g @anthropic-ai/claude-code
+    npm install -g @anthropic-ai/claude-code@latest
     echo "✅ Claude Code installed"
 else
     echo "✅ Claude Code is already installed"
@@ -169,46 +169,16 @@ fi
 #################
 # Claude Code Settings
 #################
-CLAUDE_SETTINGS="$HOME/.claude/settings.json"
-if [ ! -f "$CLAUDE_SETTINGS" ]; then
-    echo "⚙️  Configuring Claude Code settings..."
-    mkdir -p "$HOME/.claude"
-    cat > "$CLAUDE_SETTINGS" <<'SETTINGS_EOF'
-{
-  "env": {
-    "CLAUDE_CODE_NO_FLICKER": "1"
-  }
-}
-SETTINGS_EOF
-    echo "✅ Claude Code settings configured (NO_FLICKER enabled)"
-else
-    # Ensure CLAUDE_CODE_NO_FLICKER is set even if settings.json already exists
-    if ! grep -q "CLAUDE_CODE_NO_FLICKER" "$CLAUDE_SETTINGS" 2>/dev/null; then
-        echo "⚙️  Adding NO_FLICKER to existing Claude Code settings..."
-        if command -v python3 >/dev/null 2>&1; then
-            python3 -c "
-import json, sys
-with open('$CLAUDE_SETTINGS', 'r') as f:
-    data = json.load(f)
-data.setdefault('env', {})['CLAUDE_CODE_NO_FLICKER'] = '1'
-with open('$CLAUDE_SETTINGS', 'w') as f:
-    json.dump(data, f, indent=2)
-"
-            echo "✅ NO_FLICKER added to Claude Code settings"
-        else
-            echo "⚠️  python3 not found; please add CLAUDE_CODE_NO_FLICKER manually to $CLAUDE_SETTINGS"
-        fi
-    else
-        echo "✅ Claude Code settings already configured"
-    fi
-fi
+# ~/.claude/settings.json is managed by chezmoi as a full file (see
+# dot_claude/settings.json) — applied/overwritten on every `chezmoi apply`.
+# Nothing to do here.
 
 #################
 # OpenAI Codex (via npm)
 #################
 if ! command -v codex >/dev/null 2>&1; then
     echo "📦 Installing OpenAI Codex..."
-    npm install -g @openai/codex
+    npm install -g @openai/codex@latest
     echo "✅ OpenAI Codex installed"
 else
     echo "✅ OpenAI Codex is already installed"
@@ -219,16 +189,56 @@ fi
 #################
 if ! command -v oco >/dev/null 2>&1; then
     echo "📦 Installing OpenCommit..."
-    npm install -g opencommit
+    npm install -g opencommit@latest
     echo "✅ OpenCommit installed"
 else
     echo "✅ OpenCommit is already installed"
 fi
 
 #################
+# herdr (terminal multiplexer for AI agents)
+#################
+if ! command -v herdr >/dev/null 2>&1; then
+    echo "📦 Installing herdr..."
+    if curl -fsSL https://herdr.dev/install.sh | sh; then
+        echo "✅ herdr installed"
+    else
+        echo "⚠️  herdr installation failed"
+    fi
+else
+    echo "✅ herdr is already installed"
+fi
+
+#################
+# Claude Code skills (via the `skills` CLI — https://github.com/vercel-labs/skills)
+# Auto-install/update only the Anthropic skill-creator skill (idempotent → latest).
+#################
+if command -v npx >/dev/null 2>&1; then
+    echo "🧩 Installing skill-creator skill..."
+    if npx -y skills add anthropics/skills --skill skill-creator --agent claude-code --global --yes; then
+        echo "✅ skill-creator skill installed"
+    else
+        echo "⚠️  skill-creator skill install failed"
+    fi
+else
+    echo "ℹ️  npx not found; skipping skill-creator skill install"
+fi
+
+#################
 # Optional: Bitwarden-based CLI logins (gh, wandb, huggingface)
 #################
-if [ -t 0 ]; then
+# Only offer this when something still needs authenticating, so re-running on an
+# already-configured machine (e.g. a plain `chezmoi update`) never re-prompts.
+BW_NEEDS_AUTH=false
+if command -v gh >/dev/null 2>&1 && ! gh auth status >/dev/null 2>&1; then BW_NEEDS_AUTH=true; fi
+if command -v hf >/dev/null 2>&1 && ! hf auth whoami >/dev/null 2>&1; then BW_NEEDS_AUTH=true; fi
+if command -v wandb >/dev/null 2>&1; then
+    if [ -f ~/.netrc ] && grep -q "api.wandb.ai" ~/.netrc 2>/dev/null; then :
+    elif [ -f ~/.config/wandb/settings ] && grep -q "api_key" ~/.config/wandb/settings 2>/dev/null; then :
+    else BW_NEEDS_AUTH=true; fi
+fi
+
+if [ -t 0 ] && [ "$BW_NEEDS_AUTH" = true ]; then
     export PATH="$HOME/.local/bin:$PATH"
     echo "🔐 Optional: use Bitwarden to auto-login CLI tools"
     read -r -p "Set up Bitwarden-based logins now? [y/N] " BW_SETUP
@@ -419,51 +429,41 @@ fi
 # Claude Code (via npm)
 if ! command -v claude >/dev/null 2>&1; then
     echo "📦 Installing Claude Code..."
-    npm install -g @anthropic-ai/claude-code
+    npm install -g @anthropic-ai/claude-code@latest
 else
     echo "✅ Claude Code is already installed"
 fi
 
 # Claude Code Settings
-CLAUDE_SETTINGS="$HOME/.claude/settings.json"
-if [ ! -f "$CLAUDE_SETTINGS" ]; then
-    echo "⚙️  Configuring Claude Code settings..."
-    mkdir -p "$HOME/.claude"
-    cat > "$CLAUDE_SETTINGS" <<'SETTINGS_EOF'
-{
-  "env": {
-    "CLAUDE_CODE_NO_FLICKER": "1"
-  }
-}
-SETTINGS_EOF
-    echo "✅ Claude Code settings configured (NO_FLICKER enabled)"
-else
-    if ! grep -q "CLAUDE_CODE_NO_FLICKER" "$CLAUDE_SETTINGS" 2>/dev/null; then
-        echo "⚙️  Adding NO_FLICKER to existing Claude Code settings..."
-        if command -v python3 >/dev/null 2>&1; then
-            python3 -c "
-import json, sys
-with open('$CLAUDE_SETTINGS', 'r') as f:
-    data = json.load(f)
-data.setdefault('env', {})['CLAUDE_CODE_NO_FLICKER'] = '1'
-with open('$CLAUDE_SETTINGS', 'w') as f:
-    json.dump(data, f, indent=2)
-"
-            echo "✅ NO_FLICKER added to Claude Code settings"
-        else
-            echo "⚠️  python3 not found; please add CLAUDE_CODE_NO_FLICKER manually to $CLAUDE_SETTINGS"
-        fi
-    else
-        echo "✅ Claude Code settings already configured"
-    fi
-fi
+# ~/.claude/settings.json is managed by chezmoi as a full file (see
+# dot_claude/settings.json) — applied/overwritten on every `chezmoi apply`.
+# Nothing to do here.
 
 # OpenAI Codex (via npm)
 if ! command -v codex >/dev/null 2>&1; then
     echo "📦 Installing OpenAI Codex..."
-    npm install -g @openai/codex
+    npm install -g @openai/codex@latest
 else
     echo "✅ OpenAI Codex is already installed"
+fi
+
+# herdr (terminal multiplexer for AI agents)
+if ! command -v herdr >/dev/null 2>&1; then
+    echo "📦 Installing herdr..."
+    curl -fsSL https://herdr.dev/install.sh | sh && echo "✅ herdr installed" || echo "⚠️  herdr installation failed"
+else
+    echo "✅ herdr is already installed"
+fi
+
+# Claude Code skills (via the `skills` CLI — https://github.com/vercel-labs/skills)
+# Auto-install/update only the Anthropic skill-creator skill (idempotent → latest).
+if command -v npx >/dev/null 2>&1; then
+    echo "🧩 Installing skill-creator skill..."
+    npx -y skills add anthropics/skills --skill skill-creator --agent claude-code --global --yes \
+        && echo "✅ skill-creator skill installed" \
+        || echo "⚠️  skill-creator skill install failed"
+else
+    echo "ℹ️  npx not found; skipping skill-creator skill install"
 fi
 
 echo ""

@@ -49,6 +49,14 @@ if ! command -v yazi >/dev/null 2>&1; then
 fi
 
 #################
+# jq (JSON processor — required by the Claude Code statusline & settings merge)
+#################
+if ! command -v jq >/dev/null 2>&1; then
+    echo "📦 Installing jq..."
+    brew install jq
+fi
+
+#################
 # Oh My Tmux
 #################
 OHMY_TMUX_BASE="${XDG_CONFIG_HOME:-$HOME/.config}/tmux"
@@ -319,6 +327,31 @@ if ! command -v uv >/dev/null 2>&1; then
     echo "📦 Installing uv..."
     curl -LsSf https://astral.sh/uv/install.sh | sh
     echo "✅ uv installed"
+fi
+
+# jq (JSON processor — required by the Claude Code statusline)
+if ! command -v jq >/dev/null 2>&1; then
+    echo "📦 Installing jq..."
+    if [ "$HAS_SUDO" = true ]; then
+        sudo apt install -y jq
+    else
+        mkdir -p "$HOME/.local/bin"
+        case "$(uname -m)" in
+            x86_64) JQ_ASSET="jq-linux-amd64" ;;
+            aarch64|arm64) JQ_ASSET="jq-linux-arm64" ;;
+            *) JQ_ASSET="" ;;
+        esac
+        if [ -n "$JQ_ASSET" ]; then
+            if curl -fsSL "https://github.com/jqlang/jq/releases/latest/download/${JQ_ASSET}" -o "$HOME/.local/bin/jq"; then
+                chmod +x "$HOME/.local/bin/jq"
+                echo "✅ jq installed to ~/.local/bin"
+            else
+                echo "⚠️  Could not download jq (statusline stays blank until jq is available)"
+            fi
+        else
+            echo "⚠️  Unsupported arch for jq auto-install: $(uname -m)"
+        fi
+    fi
 fi
 
 #################
