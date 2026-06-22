@@ -7,6 +7,9 @@
 {{ if $apptainerEnabled -}}
 {{ $apptainerRoot = promptString "Apptainer env root directory (e.g. /path/to/envs)" -}}
 {{ end -}}
+{{- /* Base directory for nemo (firstmate orchestrator) + herdr agent worktrees. Use an
+       absolute path with enough disk; it can live outside ~ on servers where ~ is small. */ -}}
+{{ $nemoRoot := promptStringOnce . "nemo_root" "Base dir for nemo + agent worktrees (absolute path, enough disk, may be outside ~)" (printf "%s/CascadeProjects" (env "HOME")) -}}
 
 [secret]
 command = "{{ env "HOME" }}/.local/bin/get-secret.sh"
@@ -19,6 +22,7 @@ username = {{ $username | quote }}
 email = {{ $email | quote }}
 apptainer_enabled = {{ $apptainerEnabled }}
 apptainer_envs_root = {{ $apptainerRoot | quote }}
+nemo_root = {{ $nemoRoot | quote }}
 
 [hooks.read-source-state.pre]
 command = ".local/share/chezmoi/.install-password-manager.sh"

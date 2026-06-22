@@ -1,0 +1,8 @@
+[ui]
+agent_panel_scope = "current"
+{{ if .nemo_root }}
+# Keep agent worktrees (project working copies, the big disk users) off a small ~ by
+# placing them under the chezmoi `nemo_root` base directory.
+[worktrees]
+directory = {{ printf "%s/herdr-worktrees" .nemo_root | quote }}
+{{ end -}}

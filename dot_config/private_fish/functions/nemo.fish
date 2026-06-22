@@ -1,10 +1,22 @@
 function nemo --description 'Open herdr with a captain Claude Code (nemo / firstmate orchestrator)'
-    # Where the nemo fork lives; override with NEMO_DIR. Cloned on first use.
+    # Where the nemo fork lives. NEMO_DIR is normally exported by the fish config from the
+    # chezmoi prompt (conf.d/95_nemo.fish). If it is unset (prompt skipped, or an older
+    # machine), ask once and remember it as a universal variable.
     set -l nemo_dir
-    if set -q NEMO_DIR
+    if set -q NEMO_DIR; and test -n "$NEMO_DIR"
         set nemo_dir $NEMO_DIR
     else
-        set nemo_dir "$HOME/CascadeProjects/nemo"
+        echo "nemo: NEMO_DIR is not configured."
+        echo "Enter an absolute directory for the nemo orchestrator (somewhere with enough disk; can be outside ~):"
+        echo -n "nemo dir> "
+        read -l answer
+        if test -z "$answer"
+            echo "nemo: no directory given; aborting." >&2
+            return 1
+        end
+        set -U NEMO_DIR $answer
+        set nemo_dir $answer
+        echo "nemo: saved NEMO_DIR=$answer"
     end
 
     if not type -q herdr
@@ -38,6 +50,9 @@ function nemo --description 'Open herdr with a captain Claude Code (nemo / first
             sleep 0.3
         end
     end
+
+    # Pick up any config.toml changes (e.g. the worktree directory) on the running server.
+    herdr server reload-config >/dev/null 2>&1 || true
 
     # Start the captain once: a Claude Code in the nemo repo, with the herdr backend so every
     # crewmate it dispatches shows up as its own herdr pane.
