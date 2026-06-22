@@ -21,14 +21,13 @@ if command -v fnm >/dev/null 2>&1; then
 fi
 
 #################
-# npm global AI/dev tools (Claude Code, Codex, OpenCommit)
+# npm global AI/dev tools (Claude Code, Codex)
 #################
 if command -v npm >/dev/null 2>&1; then
-    echo "📦 Upgrading npm globals: Claude Code, Codex, OpenCommit..."
+    echo "📦 Upgrading npm globals: Claude Code, Codex..."
     npm install -g \
         @anthropic-ai/claude-code@latest \
         @openai/codex@latest \
-        opencommit@latest \
         || echo "⚠️  Some npm globals failed to upgrade"
 else
     echo "ℹ️  npm not found; skipping Claude Code / Codex upgrade"

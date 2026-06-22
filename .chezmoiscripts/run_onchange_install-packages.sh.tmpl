@@ -106,6 +106,12 @@ install_latest_tmux_local() {
   make install
 
   echo "✅ Local tmux installed: $("$prefix/bin/tmux" -V) ($prefix/bin/tmux)"
+
+  # Build artifacts (libevent/ncurses/tmux sources + objects) aren't needed after
+  # install — drop them so they don't sit in ~/.cache eating the home quota.
+  cd "$HOME" 2>/dev/null || true
+  rm -rf "$build_dir"
+  echo "🧹 Cleaned tmux build cache"
 }
 
 HAS_SUDO=false

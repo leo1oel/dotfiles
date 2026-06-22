@@ -651,20 +651,6 @@ if ! command -v bw >/dev/null 2>&1; then
 fi
 
 #################
-# workmux
-#################
-if ! command -v workmux >/dev/null 2>&1; then
-    echo "📦 Installing workmux..."
-    if curl -fsSL https://raw.githubusercontent.com/raine/workmux/main/scripts/install.sh | bash; then
-        echo "✅ workmux installed"
-    else
-        echo "⚠️  workmux installation failed"
-    fi
-else
-    echo "✅ workmux is already installed"
-fi
-
-#################
 # Oh My Tmux
 #################
 OHMY_TMUX_BASE="${XDG_CONFIG_HOME:-$HOME/.config}/tmux"

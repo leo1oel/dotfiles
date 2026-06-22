@@ -185,17 +185,6 @@ else
 fi
 
 #################
-# OpenCommit (via npm)
-#################
-if ! command -v oco >/dev/null 2>&1; then
-    echo "📦 Installing OpenCommit..."
-    npm install -g opencommit@latest
-    echo "✅ OpenCommit installed"
-else
-    echo "✅ OpenCommit is already installed"
-fi
-
-#################
 # herdr (terminal multiplexer for AI agents)
 #################
 if ! command -v herdr >/dev/null 2>&1; then
@@ -314,27 +303,6 @@ if [ -t 0 ] && [ "$BW_NEEDS_AUTH" = true ]; then
 
                 if [ -n "$HF_TOKEN" ] && command -v huggingface-cli >/dev/null 2>&1; then
                     huggingface-cli login --token "$HF_TOKEN" >/dev/null 2>&1 && echo "✅ Hugging Face CLI authenticated"
-                fi
-
-                if [ -n "$AIBERM_KEY" ] && command -v oco >/dev/null 2>&1; then
-                    if oco config set \
-                        OCO_AI_PROVIDER=openai \
-                        OCO_API_KEY="$AIBERM_KEY" \
-                        OCO_API_URL=https://aiberm.com/v1 \
-                        OCO_MODEL=openai/gpt-4o-mini \
-                        OCO_TOKENS_MAX_INPUT=128000 \
-                        OCO_TOKENS_MAX_OUTPUT=1024 \
-                        OCO_EMOJI=true \
-                        OCO_DESCRIPTION=false >/dev/null 2>&1; then
-                        echo "✅ OpenCommit configured"
-                        if oco hook set >/dev/null 2>&1; then
-                            echo "✅ OpenCommit git hook enabled"
-                        else
-                            echo "⚠️  OpenCommit installed, but git hook setup failed (run: oco hook set)"
-                        fi
-                    else
-                        echo "⚠️  OpenCommit config failed (run: oco config set ... manually)"
-                    fi
                 fi
 
                 echo "ℹ️  Auto-login complete (missing tools or tokens are skipped)."

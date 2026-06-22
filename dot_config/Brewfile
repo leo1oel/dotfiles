@@ -74,17 +74,9 @@ brew "golines"
 # ===========================================
 # Containers & Docker
 # ===========================================
-brew "colima", restart_service: :changed
 brew "docker"
 brew "docker-compose"
 brew "dockerfile-language-server"
-
-# ===========================================
-# AI & ML Tools
-# ===========================================
-brew "ollama", restart_service: :changed
-brew "pytorch"
-brew "gemini-cli"
 
 # ===========================================
 # System Monitoring & Performance

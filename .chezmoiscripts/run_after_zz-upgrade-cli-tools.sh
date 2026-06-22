@@ -1,7 +1,7 @@
 #!/bin/bash
 # Runs after EVERY `chezmoi apply` / `chezmoi update`.
 # Brings CLI tools to latest AND installs any that are missing:
-#   Claude Code, Codex, OpenCommit, herdr, the skill-creator skill, uv tools
+#   Claude Code, Codex, herdr, the skill-creator skill, uv tools
 #   (+ brew upgrade on macOS). The heavy lifting lives in ~/.local/bin/update-tools.sh.
 #
 # Skip it (e.g. while iterating on dotfiles) with:
