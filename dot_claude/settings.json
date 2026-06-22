@@ -1,6 +1,9 @@
 {
   "cleanupPeriodDays": 60,
   "effortLevel": "xhigh",
+  "enabledPlugins": {
+    "skill-creator@claude-plugins-official": true
+  },
   "env": {
     "BASH_DEFAULT_TIMEOUT_MS": "600000",
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "70",

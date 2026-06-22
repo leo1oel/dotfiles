@@ -90,6 +90,15 @@ if command -v curl >/dev/null 2>&1; then
     echo "🐑 Updating herdr..."
     curl -fsSL https://herdr.dev/install.sh | sh || echo "⚠️  herdr update failed"
 fi
+# Re-add herdr's Claude integration hook (live idle/working/done state in herdr
+# panes). chezmoi manages ~/.claude/settings.json as a full file and overwrites
+# it on every apply, so this hook is owned by herdr + re-applied here and by the
+# `nemo` launcher, never preserved in the chezmoi source. Idempotent; no-op
+# outside a herdr pane.
+if command -v herdr >/dev/null 2>&1; then
+    echo "🐑 Re-applying herdr Claude integration..."
+    herdr integration install claude >/dev/null 2>&1 || echo "⚠️  herdr claude integration install failed"
+fi
 
 #################
 # firstmate (nemo) crew tooling: no-mistakes (validation) + axi helpers (gh / browser /

@@ -4,7 +4,6 @@ These are common instructions for Leo's agents across all scenarios.
 
 ## General Guidelines
 
-- Never use em dashes; use a plain hyphen ("-") instead.
 - When writing commit messages, never auto-add your agent name as a co-author.
 - Never manually modify CHANGELOG.md files, or any files that are marked as auto-generated.
 - When writing or substantially editing long Markdown files, put each full sentence on its own line.
@@ -17,10 +16,10 @@ These are common instructions for Leo's agents across all scenarios.
 - Apply that same high standard to engineering excellence: lint, test failures, and test flakiness.
   If you see one, even if it is not caused by what you are working on right now, still get it fixed.
 
-## Opinions
+## Research Taste
 
-When you are working on something that would benefit from being informed by Leo's viewpoints, read ~/OPINIONS.md to understand them.
+For research-related work, read ~/TASTES.md when Leo's taste, priors, or preferred research style would improve the outcome.
 
-## Writing Profile
+## Writing
 
 When you are writing or posting on behalf of Leo, using his identity, read ~/WRITING.md to see how Leo writes.
