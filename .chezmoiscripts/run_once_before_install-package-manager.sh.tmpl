@@ -112,11 +112,28 @@ else
 fi
 
 #################
-# Fish Shell
+# Fish Shell  (ensure a MODERN fish; an old system fish breaks fzf init, etc.)
 #################
+# Treat an existing fish as "good" only if it is recent enough (>= 3.6). Otherwise
+# fall through and install a newer one — important on HPC login nodes (e.g. Hyak)
+# that ship an ancient system fish which can't even source `fzf --fish` output.
+FISH_RECENT=false
 if command -v fish >/dev/null 2>&1; then
-    echo "✅ Fish shell is already installed at $(command -v fish)"
-    FISH_PATH=$(which fish)
+    _fish_ver=$(fish --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -1)
+    _fish_major=${_fish_ver%%.*}
+    _fish_minor=${_fish_ver#*.}
+    if [ -n "$_fish_major" ]; then
+        if [ "$_fish_major" -gt 3 ]; then
+            FISH_RECENT=true
+        elif [ "$_fish_major" -eq 3 ] && [ "${_fish_minor:-0}" -ge 6 ]; then
+            FISH_RECENT=true
+        fi
+    fi
+fi
+
+if [ "$FISH_RECENT" = true ]; then
+    echo "✅ Fish ${_fish_ver} already installed at $(command -v fish)"
+    FISH_PATH=$(command -v fish)
 
     # Ensure cd.fish exists (required by zoxide)
     mkdir -p "$HOME/.local/share/fish/functions"
@@ -129,6 +146,9 @@ CDEOF
         echo "✅ Created cd.fish function for zoxide compatibility"
     fi
 else
+    if command -v fish >/dev/null 2>&1; then
+        echo "⬆️  System fish ${_fish_ver:-(unknown)} is too old (< 3.6); installing a newer fish..."
+    fi
     if [ "$HAS_SUDO" = true ]; then
         echo "🚀 Installing Fish shell via PPA..."
         sudo apt-add-repository ppa:fish-shell/release-3 -y

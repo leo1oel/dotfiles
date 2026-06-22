@@ -1,16 +1,24 @@
 if type -q fzf
-    # Try to initialize fzf for fish
-    # Check if fzf supports --fish option (fzf >= 0.48.0)
-    if fzf --fish &>/dev/null
-        # New way: fzf supports --fish option
+    # `fzf --fish` (fzf >= 0.48) emits init code that also needs a modern fish
+    # (>= 3.4); an ancient system fish chokes on it with
+    # "'return' outside of function definition". Gate on the fish version so we
+    # never source it into a fish too old to parse it.
+    set -l _fmaj (string split '.' -- $version)[1]
+    set -l _fmin (string split '.' -- $version)[2]
+    set -l _fish_ok false
+    if test "$_fmaj" -gt 3 2>/dev/null
+        set _fish_ok true
+    else if test "$_fmaj" -eq 3 -a "$_fmin" -ge 4 2>/dev/null
+        set _fish_ok true
+    end
+
+    if test "$_fish_ok" = true; and fzf --fish &>/dev/null
+        # New way: fzf supports --fish option (and fish is new enough)
         fzf --fish | source
-    else
-        # Fallback for older fzf versions
-        if test -f /usr/share/fish/vendor_functions.d/fzf_key_bindings.fish
-            source /usr/share/fish/vendor_functions.d/fzf_key_bindings.fish
-        else if test -f ~/.fzf/shell/key-bindings.fish
-            source ~/.fzf/shell/key-bindings.fish
-        end
+    else if test -f /usr/share/fish/vendor_functions.d/fzf_key_bindings.fish
+        source /usr/share/fish/vendor_functions.d/fzf_key_bindings.fish
+    else if test -f ~/.fzf/shell/key-bindings.fish
+        source ~/.fzf/shell/key-bindings.fish
     end
 
     # Unbind Ctrl-T to avoid Zellij conflict
