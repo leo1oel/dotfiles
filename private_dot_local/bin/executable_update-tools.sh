@@ -92,6 +92,28 @@ if command -v curl >/dev/null 2>&1; then
 fi
 
 #################
+# firstmate (nemo) crew tooling: no-mistakes (validation) + axi helpers (gh / browser /
+# review). Install if missing (then run its one-time `setup hooks`), update to latest if
+# already present. This is what fm-bootstrap.sh used to check; provisioning lives here now.
+#################
+if command -v npm >/dev/null 2>&1; then
+    echo "⚓ Updating firstmate axi tools (gh-axi, chrome-devtools-axi, lavish-axi)..."
+    for axi in gh-axi chrome-devtools-axi lavish-axi; do
+        if command -v "$axi" >/dev/null 2>&1; then
+            npm install -g "$axi@latest" >/dev/null 2>&1 || echo "⚠️  $axi update failed"
+        else
+            npm install -g "$axi@latest" >/dev/null 2>&1 && "$axi" setup hooks >/dev/null 2>&1 \
+                || echo "⚠️  $axi install failed"
+        fi
+    done
+fi
+if command -v curl >/dev/null 2>&1; then
+    echo "✅ Updating no-mistakes..."
+    curl -fsSL https://raw.githubusercontent.com/kunchenguid/no-mistakes/main/docs/install.sh | sh \
+        || echo "⚠️  no-mistakes update failed"
+fi
+
+#################
 # Homebrew (macOS) — upgrades everything in the Brewfile and more
 #################
 if [ "$OS" = "Darwin" ] && command -v brew >/dev/null 2>&1; then
