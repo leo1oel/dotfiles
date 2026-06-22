@@ -31,6 +31,17 @@ jq_full='[
   (.rate_limits.seven_day.resets_at // "" | tostring)
 ] | @tsv'
 
+# Separate pass for the display-only segments (model / location). Kept out of
+# jq_full because these go through their own read: with IFS=tab, read collapses
+# consecutive tabs, so an empty rate_limit field upstream would shift these.
+# A "null" sentinel keeps every field non-empty (no collapsing); we map it back
+# to "" after reading.
+jq_meta='[
+  (.model.display_name // "null" | tostring),
+  (.workspace.current_dir // .cwd // "null" | tostring),
+  (.workspace.git_worktree // "null" | tostring)
+] | @tsv'
+
 jq_rl='[
   (.rate_limits.five_hour.used_percentage // null | if . then (. | round | tostring) else "null" end),
   (.rate_limits.five_hour.resets_at // "" | tostring),
@@ -267,6 +278,16 @@ $parsed
 EOF
 used_pct="${used_pct:-null}"
 
+# Display-only segments (model name, location), parsed independently.
+parsed_meta=""
+[ -n "$input" ] && parsed_meta=$(printf '%s' "$input" | jq -r "$jq_meta" 2>/dev/null)
+IFS="$tab" read -r model_name cwd_dir git_worktree <<EOF
+$parsed_meta
+EOF
+[ "$model_name" = null ] && model_name=""
+[ "$cwd_dir" = null ] && cwd_dir=""
+[ "$git_worktree" = null ] && git_worktree=""
+
 live_session_id="${live_session_id:-}"
 [ "$live_session_id" = "null" ] && live_session_id=""
 live_api_ms="${live_api_ms:-0}"
@@ -327,6 +348,7 @@ YELLOW="\033[33m"
 RED="\033[31m"
 BLUE="\033[94m"
 MAGENTA="\033[95m"
+CYAN="\033[36m"
 
 # Format seconds remaining as "4h23m" or "1d21h"
 format_reset() {
@@ -403,4 +425,24 @@ else
   seven_part="${DIM}7d: --${RESET}"
 fi
 
-printf "%b | %b | %b\n" "$context_part" "$five_part" "$seven_part"
+# Model name (e.g. Opus): confirms which model / fast mode at a glance.
+model_part=""
+[ -n "$model_name" ] && model_part="${MAGENTA}${model_name}${RESET}"
+
+# Location: a crewmate runs inside a git worktree, so workspace.git_worktree
+# names its task (e.g. fm-task9); the captain in the main tree shows its branch.
+# This makes each herdr pane self-identifying.
+loc=""
+if [ -n "$git_worktree" ] && [ "$git_worktree" != "null" ]; then
+  loc="$git_worktree"
+elif [ -n "$cwd_dir" ]; then
+  loc=$(git -C "$cwd_dir" branch --show-current 2>/dev/null)
+fi
+git_part=""
+[ -n "$loc" ] && git_part="${CYAN}${loc}${RESET}"
+
+# Assemble, skipping empty leading segments so there are no stray separators.
+line="$context_part | $five_part | $seven_part"
+[ -n "$git_part" ] && line="$git_part | $line"
+[ -n "$model_part" ] && line="$model_part | $line"
+printf "%b\n" "$line"
