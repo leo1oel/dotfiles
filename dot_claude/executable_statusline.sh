@@ -21,6 +21,7 @@ jq_full='[
    + (.context_window.current_usage.cache_creation_input_tokens // 0)
    + (.context_window.current_usage.cache_read_input_tokens // 0) | tostring),
   (.context_window.context_window_size // 0 | tostring),
+  (.context_window.used_percentage // null | if . == null then "null" else (. | round | tostring) end),
   (.session_id // "null" | tostring),
   (.cost.total_api_duration_ms // 0 | tonumber? // 0 | floor | tostring),
   (.context_window.total_output_tokens // 0 | tonumber? // 0 | floor | tostring),
@@ -261,9 +262,10 @@ apply_highwater_all() {
 parsed=""
 [ -n "$input" ] && parsed=$(printf '%s' "$input" | jq -r "$jq_full" 2>/dev/null)
 
-IFS="$tab" read -r used_tokens window_size live_session_id live_api_ms live_output_tokens live_five_pct live_five_reset live_seven_pct live_seven_reset <<EOF
+IFS="$tab" read -r used_tokens window_size used_pct live_session_id live_api_ms live_output_tokens live_five_pct live_five_reset live_seven_pct live_seven_reset <<EOF
 $parsed
 EOF
+used_pct="${used_pct:-null}"
 
 live_session_id="${live_session_id:-}"
 [ "$live_session_id" = "null" ] && live_session_id=""
@@ -348,9 +350,13 @@ format_reset() {
   fi
 }
 
-# Context %
+# Context %: prefer Claude Code's pre-calculated used_percentage (authoritative,
+# input-only formula). It can be null right after /compact and before the first
+# API call, so fall back to computing it from current_usage / window in that gap.
 ctx_pct=0
-if [ "$window_size" -gt 0 ] 2>/dev/null; then
+if [ "$used_pct" != "null" ] && [ -n "$used_pct" ]; then
+  ctx_pct=$used_pct
+elif [ "$window_size" -gt 0 ] 2>/dev/null; then
   ctx_pct=$(awk -v u="${used_tokens:-0}" -v t="$window_size" 'BEGIN { printf "%d", (u/t)*100 }')
 fi
 if [ "$ctx_pct" -ge 85 ] 2>/dev/null; then

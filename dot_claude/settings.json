@@ -3,6 +3,8 @@
   "effortLevel": "xhigh",
   "env": {
     "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "70",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "1000000",
     "CLAUDE_CODE_NO_FLICKER": "1"
   },
   "permissions": {
