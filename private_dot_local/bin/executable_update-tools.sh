@@ -52,6 +52,29 @@ if command -v uv >/dev/null 2>&1; then
     echo "🐍 Upgrading uv and uv tools..."
     uv self update 2>/dev/null || true            # no-op if uv is package-managed
     uv tool upgrade --all || echo "⚠️  Some uv tools failed to upgrade"
+
+    # Ensure a modern python3 (>= 3.8) is the first `python3` on PATH. HPC login
+    # nodes often ship an ancient system python3 (e.g. 3.6.8) that breaks hooks
+    # needing 3.7+ (herdr's state reporter uses time.time_ns()). Idempotent: only
+    # acts when python3 is missing or older than 3.8, then fronts a uv-managed
+    # standalone python via ~/.local/bin (no compile, fast). Leaves a machine that
+    # already has a modern system python3 untouched.
+    _need_py=1
+    if command -v python3 >/dev/null 2>&1; then
+        _pyv=$(python3 -c 'import sys; print(sys.version_info[0]*100 + sys.version_info[1])' 2>/dev/null || echo 0)
+        [ "${_pyv:-0}" -ge 308 ] 2>/dev/null && _need_py=0
+    fi
+    if [ "$_need_py" = 1 ]; then
+        echo "🐍 Installing a modern python3 via uv (system python3 missing or < 3.8)..."
+        uv python install 3.12 >/dev/null 2>&1 || echo "⚠️  uv python install failed"
+        _uvpy=$(uv python find 3.12 2>/dev/null || true)
+        if [ -n "$_uvpy" ] && [ -x "$_uvpy" ]; then
+            mkdir -p "$HOME/.local/bin"
+            ln -sf "$_uvpy" "$HOME/.local/bin/python3"
+            ln -sf "$_uvpy" "$HOME/.local/bin/python"
+            echo "✅ python3 -> $_uvpy"
+        fi
+    fi
 fi
 
 #################

@@ -2,4 +2,8 @@
 # nemo orchestrator location (from the chezmoi `nemo_root` prompt). `nemo` reads NEMO_DIR;
 # its projects/ clones live here, so it stays off a small ~.
 set -gx NEMO_DIR {{ printf "%s/nemo" .nemo_root | quote }}
+# Keep uv's package cache on the same (big) filesystem as the agent worktrees so
+# uv hardlinks packages into each worktree's .venv instead of copying — fast and
+# low-disk. Default ~/.cache/uv would be on a small ~ and a different filesystem.
+set -gx UV_CACHE_DIR {{ printf "%s/uv-cache" .nemo_root | quote }}
 {{ end -}}

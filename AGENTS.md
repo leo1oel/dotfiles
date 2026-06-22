@@ -15,6 +15,9 @@ These are common instructions for Leo's agents across all scenarios.
 - If something clearly looks off, even if it is not directly related to what you are doing, try to get it fixed along the way.
 - Apply that same high standard to engineering excellence: lint, test failures, and test flakiness.
   If you see one, even if it is not caused by what you are working on right now, still get it fixed.
+- For anything Python, use `uv` exclusively.
+  Run code with `uv run` (e.g. `uv run python`, `uv run pytest`) and manage dependencies with `uv add` / `uv sync`; never invoke a bare `python`/`pip` or hand-activate a virtualenv.
+  In a git worktree, which carries only tracked files and so has no `.venv`, let `uv run` build that worktree's own `.venv` from the lockfile rather than reusing another checkout's environment.
 
 ## Research Taste
 
