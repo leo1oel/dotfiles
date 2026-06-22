@@ -172,10 +172,16 @@ CDEOF
         echo "🚀 Installing Fish shell to ~/.local (no sudo)..."
         mkdir -p "$HOME/.local/bin"
 
-        # Use official standalone binary from GitHub releases
-        # These are single-file binaries that work on any Linux
-        FISH_VERSION="4.1.2"
-        FISH_URL="https://github.com/fish-shell/fish-shell/releases/download/${FISH_VERSION}/fish-${FISH_VERSION}-linux-x86_64.tar.xz"
+        # Use official standalone binary from GitHub releases (single static binary).
+        # Fetch the LATEST release tag dynamically; fall back to a known-good version
+        # if the GitHub API is unavailable / rate-limited.
+        FISH_VERSION=$(curl -fsSL https://api.github.com/repos/fish-shell/fish-shell/releases/latest 2>/dev/null | grep '"tag_name"' | head -1 | sed -E 's/.*"tag_name":[[:space:]]*"([^"]+)".*/\1/')
+        [ -n "$FISH_VERSION" ] || FISH_VERSION="4.7.1"
+        case "$(uname -m)" in
+            aarch64|arm64) FISH_ARCH="aarch64" ;;
+            *)             FISH_ARCH="x86_64" ;;
+        esac
+        FISH_URL="https://github.com/fish-shell/fish-shell/releases/download/${FISH_VERSION}/fish-${FISH_VERSION}-linux-${FISH_ARCH}.tar.xz"
 
         cd /tmp
         FISH_INSTALLED=false

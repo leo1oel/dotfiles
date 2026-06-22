@@ -55,6 +55,35 @@ if command -v uv >/dev/null 2>&1; then
 fi
 
 #################
+# fish shell — keep the no-sudo ~/.local/bin standalone build at latest (Linux).
+# System/PPA fish is handled by apt; Homebrew fish by `brew upgrade` below.
+#################
+if [ "$OS" = "Linux" ] && [ -x "$HOME/.local/bin/fish" ] && command -v curl >/dev/null 2>&1; then
+    fish_latest=$(curl -fsSL https://api.github.com/repos/fish-shell/fish-shell/releases/latest 2>/dev/null | grep '"tag_name"' | head -1 | sed -E 's/.*"tag_name":[[:space:]]*"([^"]+)".*/\1/')
+    fish_current=$("$HOME/.local/bin/fish" --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+    if [ -n "$fish_latest" ] && [ "$fish_latest" != "$fish_current" ]; then
+        echo "🐟 Updating fish ${fish_current:-?} → ${fish_latest}..."
+        case "$(uname -m)" in
+            aarch64|arm64) fish_arch="aarch64" ;;
+            *)             fish_arch="x86_64" ;;
+        esac
+        if curl -fsSL "https://github.com/fish-shell/fish-shell/releases/download/${fish_latest}/fish-${fish_latest}-linux-${fish_arch}.tar.xz" -o /tmp/fish.tar.xz; then
+            rm -rf /tmp/fish-dl && mkdir -p /tmp/fish-dl
+            if tar -xf /tmp/fish.tar.xz -C /tmp/fish-dl 2>/dev/null; then
+                fish_bin=$(find /tmp/fish-dl -type f -name fish | head -1)
+                if [ -n "$fish_bin" ]; then
+                    chmod +x "$fish_bin" && mv "$fish_bin" "$HOME/.local/bin/fish"
+                    echo "✅ fish updated to ${fish_latest}"
+                fi
+            fi
+            rm -rf /tmp/fish.tar.xz /tmp/fish-dl
+        else
+            echo "⚠️  fish ${fish_latest} download failed (keeping ${fish_current:-current})"
+        fi
+    fi
+fi
+
+#################
 # herdr (terminal multiplexer for AI agents)
 #################
 if command -v curl >/dev/null 2>&1; then
