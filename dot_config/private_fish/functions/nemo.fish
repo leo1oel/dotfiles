@@ -40,11 +40,16 @@ function nemo --description 'Open herdr with a captain Claude Code (nemo / first
             echo "nemo: clone failed." >&2
             return 1
         end
-    else if test (git -C "$nemo_dir" rev-parse --abbrev-ref HEAD) != $nemo_branch
-        echo "nemo: switching $nemo_dir onto the $nemo_branch branch (herdr port) ..."
-        git -C "$nemo_dir" fetch origin $nemo_branch
-        and git -C "$nemo_dir" checkout $nemo_branch
-        or echo "nemo: could not switch to $nemo_branch; fix $nemo_dir by hand." >&2
+    else
+        # Keep an existing clone on the herdr port AND current with pushed fixes.
+        if test (git -C "$nemo_dir" rev-parse --abbrev-ref HEAD) != $nemo_branch
+            echo "nemo: switching $nemo_dir onto the $nemo_branch branch (herdr port) ..."
+            git -C "$nemo_dir" fetch origin $nemo_branch
+            and git -C "$nemo_dir" checkout $nemo_branch
+            or echo "nemo: could not switch to $nemo_branch; fix $nemo_dir by hand." >&2
+        end
+        # Fast-forward to the latest pushed herdr-backend (no-op if diverged/offline).
+        git -C "$nemo_dir" pull --ff-only >/dev/null 2>&1
     end
 
     # Keep the herdr <-> Claude integration current (idempotent; gives live sidebar state).
