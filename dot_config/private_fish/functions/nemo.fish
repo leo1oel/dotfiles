@@ -28,14 +28,23 @@ function nemo --description 'Open herdr with a captain Claude Code (nemo / first
         return 1
     end
 
-    # Clone the fork on first use.
+    # The herdr port lives on the `herdr-backend` branch. The fork's DEFAULT branch
+    # (main) still tracks upstream firstmate, which uses treehouse instead of herdr —
+    # so a plain clone/checkout makes the captain ask to install treehouse. Pin the
+    # branch here: clone it on first use, and switch an existing clone onto it.
+    set -l nemo_branch herdr-backend
     if not test -d "$nemo_dir/.git"
-        echo "nemo: cloning leo1oel/nemo into $nemo_dir ..."
-        git clone https://github.com/leo1oel/nemo.git "$nemo_dir"
+        echo "nemo: cloning leo1oel/nemo ($nemo_branch) into $nemo_dir ..."
+        git clone --branch $nemo_branch https://github.com/leo1oel/nemo.git "$nemo_dir"
         or begin
             echo "nemo: clone failed." >&2
             return 1
         end
+    else if test (git -C "$nemo_dir" rev-parse --abbrev-ref HEAD) != $nemo_branch
+        echo "nemo: switching $nemo_dir onto the $nemo_branch branch (herdr port) ..."
+        git -C "$nemo_dir" fetch origin $nemo_branch
+        and git -C "$nemo_dir" checkout $nemo_branch
+        or echo "nemo: could not switch to $nemo_branch; fix $nemo_dir by hand." >&2
     end
 
     # Keep the herdr <-> Claude integration current (idempotent; gives live sidebar state).
