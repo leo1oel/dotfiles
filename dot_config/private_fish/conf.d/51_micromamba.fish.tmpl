@@ -1,7 +1,7 @@
 {{ if eq .chezmoi.os "linux" -}}
 {{ if .nemo_root -}}
 # Keep the conda-forge "tools" env on the big filesystem. Its packages
-# (poppler/ffmpegthumbnailer/chafa/imagemagick/ripgrep/fd/7z) are hundreds of MB
+# (poppler/ffmpeg/chafa/imagemagick/ripgrep/fd/7z) are hundreds of MB
 # and would blow a small ~ quota on an HPC login node.
 set -gx MAMBA_ROOT_PREFIX {{ printf "%s/mamba" .nemo_root | quote }}
 {{ else -}}
@@ -9,7 +9,7 @@ set -q MAMBA_ROOT_PREFIX; or set -gx MAMBA_ROOT_PREFIX $HOME/.local/share/mamba
 {{ end -}}
 # Front that env's binaries onto PATH when present. This is how a no-sudo cluster
 # (where apt/dnf is unavailable) gets pdftoppm for yazi's PDF preview, plus chafa,
-# ffmpegthumbnailer, ripgrep, fd, 7z, etc. The env itself is built idempotently by
+# ffmpeg, ripgrep, fd, 7z, etc. The env itself is built idempotently by
 # update-tools.sh via micromamba. No-op when the dir is absent. macOS installs all
 # of these via the Brewfile, so this file is Linux-only.
 if test -d "$MAMBA_ROOT_PREFIX/envs/tools/bin"

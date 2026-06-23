@@ -79,7 +79,7 @@ fi
 
 #################
 # Media / CLI tools that need compiled C libs (pdftoppm/poppler for yazi's PDF
-# preview, ffmpegthumbnailer, chafa, imagemagick) plus a few Rust tools (ripgrep,
+# preview, ffmpeg, chafa, imagemagick) plus a few Rust tools (ripgrep,
 # fd, 7z). On a no-sudo cluster apt/dnf is unavailable, so these are delivered via
 # a conda-forge env built by micromamba — a single static, relocatable binary that
 # bundles its own libs, so it needs no sudo and ignores the system glibc. macOS
@@ -123,9 +123,9 @@ if [ "$OS" = "Linux" ] && ! command -v pdftoppm >/dev/null 2>&1; then
             fi
         fi
         if [ -n "${_mamba:-}" ] && [ -x "$_mamba" ]; then
-            echo "🎬 Building conda-forge tools env (poppler/ffmpegthumbnailer/chafa/imagemagick/ripgrep/fd/7z)..."
+            echo "🎬 Building conda-forge tools env (poppler/ffmpeg/chafa/imagemagick/ripgrep/fd/7z)..."
             "$_mamba" create -y -r "$_tools_root" -n tools -c conda-forge \
-                poppler ffmpegthumbnailer chafa imagemagick ripgrep fd-find sevenzip \
+                poppler ffmpeg chafa imagemagick ripgrep fd-find p7zip \
                 >/dev/null 2>&1 \
                 && echo "✅ tools env -> $_tools_root/envs/tools/bin" \
                 || echo "⚠️  tools env build failed"
