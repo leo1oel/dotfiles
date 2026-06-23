@@ -5,8 +5,15 @@
 
 if command -v brew >/dev/null 2>&1; then
   if [ -f "$HOME/.config/Brewfile" ]; then
-    echo "📦 Updating macOS packages via Homebrew..."
-    brew bundle --file "$HOME/.config/Brewfile"
+    echo "📦 Installing any missing macOS packages via Homebrew..."
+    # --no-upgrade: only install packages that are MISSING; never upgrade already
+    # installed formulae. Editing the Brewfile (e.g. adding poppler) must not drag
+    # in a mass upgrade of everything outdated — that is slow and a single heavy
+    # formula failing (e.g. pytorch) would abort the whole chezmoi run. Upgrades are
+    # handled separately by `up` / update-tools.sh (`brew upgrade`).
+    if ! brew bundle --no-upgrade --file "$HOME/.config/Brewfile"; then
+      echo "⚠️  brew bundle reported errors; continuing. Run 'brew bundle --no-upgrade --file ~/.config/Brewfile' by hand to see details."
+    fi
   else
     echo "⚠️  Brewfile not found at ~/.config/Brewfile, skipping package installation"
     echo "   This is normal on first run. Run 'chezmoi apply' again after completion."
