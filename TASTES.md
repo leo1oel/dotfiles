@@ -18,7 +18,6 @@ For open-ended research-direction work, read more than one.
   Read `~/tastes/problem-selection.md`.
 - Doing the work rigorously: experiment design, evaluation, engineering, and the artifacts to leave behind.
   Read `~/tastes/method-and-rigor.md`.
-- Reading and investigation: how to read papers and survey material Leo provides.
-  Read `~/tastes/reading.md`.
 
+For reading and investigating papers, see `~/READING.md`.
 For how Leo writes, both his public voice and using writing as a tool to think, see `~/WRITING.md`.

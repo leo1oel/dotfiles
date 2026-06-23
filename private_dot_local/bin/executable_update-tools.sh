@@ -216,4 +216,25 @@ if command -v chezmoi >/dev/null 2>&1; then
     chezmoi upgrade 2>/dev/null || true
 fi
 
+#################
+# OpenAlex API key — used by the literature-search workflow (~/SEARCHING.md).
+# Free key from https://openalex.org/settings/api. If we have neither an exported
+# key nor the saved key file, prompt once (interactively only) and persist it to a
+# 0600 file that 53_openalex.fish exports into every future shell. Skips silently
+# in non-interactive runs (no TTY) and once the key is present.
+#################
+_oa_key_file="$HOME/.config/openalex/api_key"
+if [ -z "${OPENALEX_API_KEY:-}" ] && [ ! -s "$_oa_key_file" ] && [ -t 0 ]; then
+    printf '🔑 OpenAlex API key not set. Paste it (free at https://openalex.org/settings/api), or press Enter to skip: '
+    read -r _oa_key || _oa_key=""
+    if [ -n "$_oa_key" ]; then
+        mkdir -p "$(dirname "$_oa_key_file")"
+        printf '%s\n' "$_oa_key" >"$_oa_key_file"
+        chmod 600 "$_oa_key_file"
+        echo "✅ Saved to $_oa_key_file; new shells will export OPENALEX_API_KEY."
+    else
+        echo "ℹ️  Skipped; literature search will use the keyless (rate-limited) pool."
+    fi
+fi
+
 echo "✅ Tool upgrade complete."

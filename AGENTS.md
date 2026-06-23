@@ -23,6 +23,14 @@ These are common instructions for Leo's agents across all scenarios.
 
 For research-related work, read ~/TASTES.md when Leo's taste, priors, or preferred research style would improve the outcome.
 
+## Reading Papers
+
+When reading a paper on arxiv, convert to clean markdown with arxiv2md first. See ~/READING.md for the workflow.
+
+## Finding Related Work
+
+When searching the literature or mapping related work (related papers, citations, references), follow the OpenAlex workflow in ~/SEARCHING.md instead of ad-hoc web search.
+
 ## Writing
 
 When you are writing or posting on behalf of Leo, using his identity, read ~/WRITING.md to see how Leo writes.
