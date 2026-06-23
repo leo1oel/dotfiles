@@ -78,6 +78,62 @@ if command -v uv >/dev/null 2>&1; then
 fi
 
 #################
+# Media / CLI tools that need compiled C libs (pdftoppm/poppler for yazi's PDF
+# preview, ffmpegthumbnailer, chafa, imagemagick) plus a few Rust tools (ripgrep,
+# fd, 7z). On a no-sudo cluster apt/dnf is unavailable, so these are delivered via
+# a conda-forge env built by micromamba — a single static, relocatable binary that
+# bundles its own libs, so it needs no sudo and ignores the system glibc. macOS
+# gets all of these from Homebrew (Brewfile), so this is Linux-only. Idempotent:
+# skips entirely once pdftoppm is on PATH or the env already exists. The env lives
+# under $MAMBA_ROOT_PREFIX (set to the big filesystem by 51_micromamba.fish.tmpl);
+# 51_micromamba.fish fronts its bin/ onto PATH for interactive shells.
+#################
+if [ "$OS" = "Linux" ] && ! command -v pdftoppm >/dev/null 2>&1; then
+    # Resolve where the env lives. Prefer MAMBA_ROOT_PREFIX (51_micromamba.fish
+    # pins it to the big disk), but that conf is not yet sourced on the same `up`
+    # run that just pulled it, so fall back to deriving the big disk from NEMO_DIR
+    # (already exported) before the small-~ default — these envs are hundreds of MB
+    # and would blow an HPC ~ quota.
+    if [ -n "${MAMBA_ROOT_PREFIX:-}" ]; then
+        _tools_root="$MAMBA_ROOT_PREFIX"
+    elif [ -n "${NEMO_DIR:-}" ]; then
+        _tools_root="$(dirname "$NEMO_DIR")/mamba"
+    else
+        _tools_root="$HOME/.local/share/mamba"
+    fi
+    if [ -x "$_tools_root/envs/tools/bin/pdftoppm" ]; then
+        :   # env already built — fish puts it on PATH in interactive shells
+    elif command -v curl >/dev/null 2>&1; then
+        _mamba="$HOME/.local/bin/micromamba"
+        command -v micromamba >/dev/null 2>&1 && _mamba="$(command -v micromamba)"
+        if [ ! -x "$_mamba" ]; then
+            echo "📦 Installing micromamba (no-sudo media-tools delivery)..."
+            case "$(uname -m)" in
+                aarch64|arm64) _mm_arch="linux-aarch64" ;;
+                *)             _mm_arch="linux-64" ;;
+            esac
+            mkdir -p "$HOME/.local/bin"
+            if curl -fsSL "https://micro.mamba.pm/api/micromamba/${_mm_arch}/latest" \
+                | tar -xj -C "$HOME/.local" bin/micromamba 2>/dev/null; then
+                chmod +x "$HOME/.local/bin/micromamba"
+                _mamba="$HOME/.local/bin/micromamba"
+            else
+                echo "⚠️  micromamba download failed; skipping media tools"
+                _mamba=""
+            fi
+        fi
+        if [ -n "${_mamba:-}" ] && [ -x "$_mamba" ]; then
+            echo "🎬 Building conda-forge tools env (poppler/ffmpegthumbnailer/chafa/imagemagick/ripgrep/fd/7z)..."
+            "$_mamba" create -y -r "$_tools_root" -n tools -c conda-forge \
+                poppler ffmpegthumbnailer chafa imagemagick ripgrep fd-find sevenzip \
+                >/dev/null 2>&1 \
+                && echo "✅ tools env -> $_tools_root/envs/tools/bin" \
+                || echo "⚠️  tools env build failed"
+        fi
+    fi
+fi
+
+#################
 # fish shell — keep the no-sudo ~/.local/bin standalone build at latest (Linux).
 # System/PPA fish is handled by apt; Homebrew fish by `brew upgrade` below.
 #################

@@ -127,5 +127,8 @@ brew "libtool"
 # ===========================================
 brew "imagemagick"
 brew "ffmpeg"
+brew "ffmpegthumbnailer" # yazi video thumbnails
+brew "poppler"           # pdftoppm — yazi PDF preview
+brew "chafa"             # protocol-independent image fallback
 brew "ghostscript"
 brew "tectonic"

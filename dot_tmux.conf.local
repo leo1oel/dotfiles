@@ -38,7 +38,11 @@ tmux_conf_new_session_retain_current_path=false
 #   - true
 #   - false (default)
 #   - disabled (do not modify new-window bindings)
-tmux_conf_new_window_retain_current_path=false
+# true: a new window (prefix + c, i.e. a "new tab") opens in the same directory
+# as the current pane. Matches the split bindings below, which already retain it.
+# Crucial over SSH: Ghostty's own New Tab/Split spawns a LOCAL shell and cannot
+# know the remote cwd, so do the multiplexing inside tmux on the server instead.
+tmux_conf_new_window_retain_current_path=true
 
 # new window tries to reconnect ssh sessions, possible values are:
 #   - true
@@ -382,6 +386,14 @@ tmux_conf_urlscan_options="--compact --dedupe"
 # -- user customizations -------------------------------------------------------
 
 # this is the place to override or undo settings
+
+# Let terminal graphics escape sequences (kitty graphics protocol, sixel) pass
+# through tmux to the outer terminal. Without this, tmux swallows them and image
+# previews go blank. yazi detects $TMUX and wraps its escapes in the tmux
+# passthrough envelope, so with this on, `yazi` image/PDF previews render inside
+# a tmux pane when the outer terminal is graphics-capable (e.g. Ghostty).
+# Note: herdr has no passthrough, so use tmux (not herdr) for image-preview work.
+set -g allow-passthrough on
 
 # increase history size
 #set -g history-limit 10000
