@@ -34,15 +34,17 @@ else
 fi
 
 #################
-# Agent skills — install Leo's personal skills repository globally for all
-# supported agents (via the `skills` CLI: https://github.com/vercel-labs/skills).
+# Agent skills — install Leo's personal skills repository globally for Claude Code,
+# the only agent that supports global skills (and what the nemo fleet runs on). Eve and
+# PromptScript take project-local skills only, so a global step cannot install to them;
+# they are intentionally not targeted here. (skills CLI: https://github.com/vercel-labs/skills)
 # Use a temp npm cache here because some machines may have stale/root-owned
 # ~/.npm cache entries from older npm versions.
 #################
 if command -v npx >/dev/null 2>&1; then
     echo "🧩 Updating Leo agent skills..."
     npm_config_cache="${npm_config_cache:-${TMPDIR:-/tmp}/npm-cache-${USER:-user}}" \
-        npx -y skills add leo1oel/leo-agent-skills --global --all \
+        npx -y skills add leo1oel/leo-agent-skills --agent claude-code --global --all \
         || echo "⚠️  Leo agent skills update failed"
 else
     echo "ℹ️  npx not found; skipping Leo agent skills update"
