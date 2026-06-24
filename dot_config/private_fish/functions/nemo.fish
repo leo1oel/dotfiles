@@ -7,7 +7,9 @@ function nemo --description 'Open herdr with a captain Claude Code (nemo / first
         set nemo_dir $NEMO_DIR
     else
         echo "nemo: NEMO_DIR is not configured."
-        echo "Enter an absolute directory for the nemo orchestrator (somewhere with enough disk; can be outside ~):"
+        echo "Enter an absolute directory for the nemo orchestrator - an empty or not-yet-existing"
+        echo "directory with enough disk (can be outside ~, e.g. /tmp/nemo). The clone goes HERE,"
+        echo "so do not point it at a populated directory like /tmp itself:"
         echo -n "nemo dir> "
         read -l answer
         if test -z "$answer"
@@ -33,6 +35,16 @@ function nemo --description 'Open herdr with a captain Claude Code (nemo / first
     # so a plain clone/checkout makes the captain ask to install treehouse. Pin the
     # branch here: clone it on first use, and switch an existing clone onto it.
     set -l nemo_branch herdr-backend
+    # NEMO_DIR is the clone location itself, so it must be empty or not yet exist (an
+    # existing nemo clone is fine). Cloning into a populated non-git dir like /tmp fails
+    # with a cryptic git error, so catch that here with an actionable message instead.
+    if not test -d "$nemo_dir/.git"; and test (count (command ls -A "$nemo_dir" 2>/dev/null)) -gt 0
+        echo "nemo: '$nemo_dir' already exists and is not empty, so git cannot clone into it." >&2
+        echo "nemo: point NEMO_DIR at an empty or new directory instead, e.g.:" >&2
+        echo "      set -U NEMO_DIR $nemo_dir/nemo" >&2
+        echo "nemo: then run 'nemo' again.  (to re-pick from scratch:  set -e NEMO_DIR)" >&2
+        return 1
+    end
     if not test -d "$nemo_dir/.git"
         echo "nemo: cloning leo1oel/nemo ($nemo_branch) into $nemo_dir ..."
         git clone --branch $nemo_branch https://github.com/leo1oel/nemo.git "$nemo_dir"
@@ -59,7 +71,7 @@ function nemo --description 'Open herdr with a captain Claude Code (nemo / first
     if not herdr status server 2>/dev/null | string match -q '*status: running*'
         herdr server >/dev/null 2>&1 &
         disown
-        for _ in (seq 1 20)
+        for i in (seq 1 20)
             herdr status server 2>/dev/null | string match -q '*status: running*'; and break
             sleep 0.3
         end
