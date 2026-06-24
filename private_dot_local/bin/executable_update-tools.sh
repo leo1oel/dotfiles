@@ -34,15 +34,18 @@ else
 fi
 
 #################
-# Claude Code skills — keep the Anthropic skill-creator skill at latest
-# (via the `skills` CLI: https://github.com/vercel-labs/skills)
+# Agent skills — install Leo's personal skills repository globally for all
+# supported agents (via the `skills` CLI: https://github.com/vercel-labs/skills).
+# Use a temp npm cache here because some machines may have stale/root-owned
+# ~/.npm cache entries from older npm versions.
 #################
 if command -v npx >/dev/null 2>&1; then
-    echo "🧩 Updating skill-creator skill..."
-    npx -y skills add anthropics/skills --skill skill-creator --agent claude-code --global --yes \
-        || echo "⚠️  skill-creator skill update failed"
+    echo "🧩 Updating Leo agent skills..."
+    npm_config_cache="${npm_config_cache:-${TMPDIR:-/tmp}/npm-cache-${USER:-user}}" \
+        npx -y skills add leo1oel/leo-agent-skills --global --all \
+        || echo "⚠️  Leo agent skills update failed"
 else
-    echo "ℹ️  npx not found; skipping skill-creator skill update"
+    echo "ℹ️  npx not found; skipping Leo agent skills update"
 fi
 
 #################
@@ -217,7 +220,7 @@ if command -v chezmoi >/dev/null 2>&1; then
 fi
 
 #################
-# OpenAlex API key — used by the literature-search workflow (~/SEARCHING.md).
+# OpenAlex API key — used by the `related-work-openalex` skill.
 # Free key from https://openalex.org/settings/api. If we have neither an exported
 # key nor the saved key file, prompt once (interactively only) and persist it to a
 # 0600 file that 53_openalex.fish exports into every future shell. Skips silently
