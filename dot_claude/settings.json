@@ -14,8 +14,23 @@
   "hooks": {
     "PreToolUse": [
       {
+        "matcher": "WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/pre_tool_use_arxiv.py",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "Bash",
         "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/pre_tool_use_arxiv.py",
+            "timeout": 10
+          },
           {
             "type": "command",
             "command": "python3 ~/.claude/hooks/pre_tool_use_uv.py",
