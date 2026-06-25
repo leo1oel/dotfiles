@@ -192,8 +192,8 @@ fi
 # already present. This is what fm-bootstrap.sh used to check; provisioning lives here now.
 #################
 if command -v npm >/dev/null 2>&1; then
-    echo "⚓ Updating firstmate axi tools (gh-axi, chrome-devtools-axi, lavish-axi)..."
-    for axi in gh-axi chrome-devtools-axi lavish-axi; do
+    echo "⚓ Updating firstmate axi tools (gh-axi, chrome-devtools-axi, lavish-axi, tasks-axi)..."
+    for axi in gh-axi chrome-devtools-axi lavish-axi tasks-axi; do
         if command -v "$axi" >/dev/null 2>&1; then
             npm install -g "$axi@latest" >/dev/null 2>&1 || echo "⚠️  $axi update failed"
         else
