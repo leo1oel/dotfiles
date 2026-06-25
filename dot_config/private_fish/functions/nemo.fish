@@ -82,8 +82,16 @@ function nemo --description 'Open herdr with a captain Claude Code (nemo / first
 
     # Start the captain once: a Claude Code in the nemo repo, with the herdr backend so every
     # crewmate it dispatches shows up as its own herdr pane.
+    # As root (a disposable sandbox container) claude refuses its bypass-permissions mode
+    # unless IS_SANDBOX=1 is set, so pass it explicitly here too - this covers the captain
+    # agent even when the already-running herdr server was started without it.
+    # (conf.d/30_claude_sandbox.fish sets it for fresh servers and the crewmates they spawn.)
+    set -l captain_env --env FM_BACKEND=herdr
+    if test (id -u) -eq 0
+        set captain_env $captain_env --env IS_SANDBOX=1
+    end
     if not herdr agent list 2>/dev/null | string match -q '*"name":"captain"*'
-        herdr agent start captain --cwd "$nemo_dir" --env FM_BACKEND=herdr --focus -- claude >/dev/null
+        herdr agent start captain --cwd "$nemo_dir" $captain_env --focus -- claude >/dev/null
     end
 
     # Attach (takes over this terminal until you detach with the herdr prefix, default ctrl+b q).
