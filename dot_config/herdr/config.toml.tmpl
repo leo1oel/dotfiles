@@ -5,4 +5,17 @@ agent_panel_scope = "current"
 # placing them under the chezmoi `nemo_root` base directory.
 [worktrees]
 directory = {{ printf "%s/herdr-worktrees" .nemo_root | quote }}
-{{ end -}}
+{{ end }}
+# herdr-file-viewer plugin (installed/updated by ~/.local/bin/update-tools.sh):
+# read-only, git-aware file tree + diff/markdown/code preview, rendered via
+# delta/glow/bat. prefix+f opens it in a split beside your work; prefix+shift+f
+# opens it in its own tab. (Default prefix is ctrl+b.)
+[[keys.command]]
+key = "prefix+f"
+type = "shell"
+command = "herdr plugin action invoke open-file-viewer --plugin herdr-file-viewer"
+
+[[keys.command]]
+key = "prefix+shift+f"
+type = "shell"
+command = "herdr plugin action invoke open-file-viewer-tab --plugin herdr-file-viewer"

@@ -32,6 +32,7 @@ fzf
 # zoxide - installed via GitHub release in run_once script (not in Ubuntu 20.04 repos)
 # eza - better ls (requires custom repo, installed in run_once script)
 # yazi - terminal file manager (not in apt for older Ubuntu, installed via GitHub release)
+# glow - markdown renderer for the herdr-file-viewer plugin (not in apt; installed via GitHub release in update-tools.sh)
 
 # ===========================================
 # Editors

@@ -184,6 +184,51 @@ fi
 if command -v herdr >/dev/null 2>&1; then
     echo "🐑 Re-applying herdr Claude integration..."
     herdr integration install claude >/dev/null 2>&1 || echo "⚠️  herdr claude integration install failed"
+
+    # herdr plugins. file-viewer = read-only, git-aware file tree + diff/markdown/code
+    # preview in a herdr split (keybindings live in herdr/config.toml). `plugin install`
+    # downloads a prebuilt binary for our platform (macOS arm64 / linux x86_64), so no
+    # Rust toolchain is needed; re-running it updates to the latest release. Idempotent.
+    echo "🐑 Installing/updating herdr plugins (file-viewer)..."
+    herdr plugin install smarzban/herdr-file-viewer --yes >/dev/null 2>&1 \
+        || echo "⚠️  herdr file-viewer plugin install failed"
+fi
+
+#################
+# glow (markdown renderer) — the herdr-file-viewer plugin uses it to render .md
+# previews (diffs go through delta, code through bat). macOS installs it from the
+# Brewfile; Linux has no sudo-free source for charmbracelet's glow (it is not in the
+# default apt repos, and conda-forge `glow` is an unrelated genomics toolkit), so
+# fetch the prebuilt binary from GitHub releases into ~/.local/bin. Idempotent:
+# installs when missing and updates when a newer tag ships.
+#################
+if [ "$OS" = "Linux" ] && command -v curl >/dev/null 2>&1; then
+    glow_latest=$(curl -fsSL https://api.github.com/repos/charmbracelet/glow/releases/latest 2>/dev/null | grep '"tag_name"' | head -1 | sed -E 's/.*"tag_name":[[:space:]]*"v?([^"]+)".*/\1/')
+    glow_current=""
+    if command -v glow >/dev/null 2>&1; then
+        glow_current=$(glow --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+    fi
+    if [ -n "$glow_latest" ] && [ "$glow_latest" != "$glow_current" ]; then
+        echo "📝 Updating glow ${glow_current:-missing} → ${glow_latest}..."
+        case "$(uname -m)" in
+            aarch64|arm64) glow_arch="arm64" ;;
+            *)             glow_arch="x86_64" ;;
+        esac
+        if curl -fsSL "https://github.com/charmbracelet/glow/releases/download/v${glow_latest}/glow_${glow_latest}_Linux_${glow_arch}.tar.gz" -o /tmp/glow.tar.gz; then
+            rm -rf /tmp/glow-dl && mkdir -p /tmp/glow-dl
+            if tar -xf /tmp/glow.tar.gz -C /tmp/glow-dl 2>/dev/null; then
+                glow_bin=$(find /tmp/glow-dl -type f -name glow | head -1)
+                if [ -n "$glow_bin" ]; then
+                    mkdir -p "$HOME/.local/bin"
+                    chmod +x "$glow_bin" && mv "$glow_bin" "$HOME/.local/bin/glow"
+                    echo "✅ glow ${glow_latest} -> ~/.local/bin/glow"
+                fi
+            fi
+            rm -rf /tmp/glow.tar.gz /tmp/glow-dl
+        else
+            echo "⚠️  glow ${glow_latest} download failed"
+        fi
+    fi
 fi
 
 #################

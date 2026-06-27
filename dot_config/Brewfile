@@ -23,6 +23,7 @@ brew "tmux"
 # Modern CLI Tools
 # ===========================================
 brew "bat"
+brew "glow"   # markdown renderer (herdr-file-viewer plugin uses it; falls back to plain text if absent)
 brew "ripgrep"
 brew "fd"
 brew "fzf"
