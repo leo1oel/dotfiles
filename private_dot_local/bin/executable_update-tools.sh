@@ -192,6 +192,23 @@ if command -v herdr >/dev/null 2>&1; then
     echo "🐑 Installing/updating herdr plugins (file-viewer)..."
     herdr plugin install smarzban/herdr-file-viewer --yes >/dev/null 2>&1 \
         || echo "⚠️  herdr file-viewer plugin install failed"
+
+    # A herdr self-update (the curl install above) replaces the on-disk binary, but any
+    # already-running server keeps executing the old, now-deleted inode. herdr then hands
+    # plugins a HERDR_BIN_PATH like `~/.local/bin/herdr (deleted)`, so every plugin action that
+    # shells back through it dies with exit 127 — e.g. the file-viewer split silently never
+    # opens. `nemo` reuses a running server, so the stale one lingers until restarted. Bounce an
+    # *idle* server here so the next `nemo` starts on the fresh binary+plugins; if a captain/crew
+    # is live, only warn so we never kill running agents out from under the user.
+    if herdr status server 2>/dev/null | grep -q running; then
+        if herdr agent list 2>/dev/null | grep -q '"name"'; then
+            echo "⚠️  herdr was updated but a server with live agents is still on the old binary."
+            echo "    Plugin actions (file-viewer) will fail until you restart it:  herdr server stop; nemo"
+        else
+            echo "🐑 Restarting idle herdr server to pick up the update..."
+            herdr server stop >/dev/null 2>&1 || true
+        fi
+    fi
 fi
 
 #################

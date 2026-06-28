@@ -67,6 +67,12 @@ function nemo --description 'Open herdr with a captain Claude Code (nemo / first
     # Keep the herdr <-> Claude integration current (idempotent; gives live sidebar state).
     herdr integration install claude >/dev/null 2>&1
 
+    # Ensure the file-viewer plugin is present so the config.toml prefix+f / prefix+shift+f
+    # keybindings have something to invoke. update-tools.sh installs it too, but a fresh nemo
+    # box or sandbox container may only ever run `nemo`, so install it here as well. Idempotent;
+    # pulls a prebuilt binary (no Rust toolchain) and re-running updates to the latest release.
+    herdr plugin install smarzban/herdr-file-viewer --yes >/dev/null 2>&1
+
     # Ensure the herdr server is up so the captain can be seeded before we attach.
     if not herdr status server 2>/dev/null | string match -q '*status: running*'
         herdr server >/dev/null 2>&1 &
