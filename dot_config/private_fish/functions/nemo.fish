@@ -60,8 +60,19 @@ function nemo --description 'Open herdr with a captain Claude Code (nemo / first
             and git -C "$nemo_dir" checkout $nemo_branch
             or echo "nemo: could not switch to $nemo_branch; fix $nemo_dir by hand." >&2
         end
-        # Fast-forward to the latest pushed herdr-backend (no-op if diverged/offline).
-        git -C "$nemo_dir" pull --ff-only >/dev/null 2>&1
+        # Fast-forward to the latest pushed herdr-backend. Non-fatal so an offline or
+        # locally-modified clone still launches, but warn loudly instead of silently
+        # running a stale checkout: a forgotten local edit or commit here blocks the
+        # fast-forward and needs a manual merge, so surface that rather than hide it.
+        set -l nemo_pull_err (git -C "$nemo_dir" pull --ff-only 2>&1)
+        if test $status -ne 0
+            echo "⚠️  nemo: could not fast-forward $nemo_dir; launching on the current (possibly stale) checkout." >&2
+            echo "    Likely local changes/commits (diverged, needs a manual merge) or you are offline. git said:" >&2
+            for line in $nemo_pull_err
+                echo "      $line" >&2
+            end
+            echo "    To sync: cd $nemo_dir; git status   (then stash / commit / merge as needed)" >&2
+        end
     end
 
     # Refresh the fleet tooling that the captain + crew rely on: npm AI globals
