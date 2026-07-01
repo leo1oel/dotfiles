@@ -64,14 +64,43 @@ function nemo --description 'Open herdr with a captain Claude Code (nemo / first
         git -C "$nemo_dir" pull --ff-only >/dev/null 2>&1
     end
 
-    # Keep the herdr <-> Claude integration current (idempotent; gives live sidebar state).
-    herdr integration install claude >/dev/null 2>&1
-
-    # Ensure the file-viewer plugin is present so the config.toml prefix+f / prefix+shift+f
-    # keybindings have something to invoke. update-tools.sh installs it too, but a fresh nemo
-    # box or sandbox container may only ever run `nemo`, so install it here as well. Idempotent;
-    # pulls a prebuilt binary (no Rust toolchain) and re-running updates to the latest release.
-    herdr plugin install smarzban/herdr-file-viewer --yes >/dev/null 2>&1
+    # Refresh the fleet tooling that the captain + crew rely on: npm AI globals
+    # (Claude Code, Codex), Leo agent skills, herdr (self-update + Claude integration
+    # + file-viewer plugin), and the firstmate axi/no-mistakes crew tooling. This is
+    # the `nemo` subset of update-tools.sh — a fresh nemo box or sandbox container may
+    # only ever run `nemo` (never `up`), so it must be able to provision everything the
+    # fleet needs on its own. `up` still owns the full CLI upgrade; axi/no-mistakes now
+    # live here only (see update-tools.sh mode dispatch).
+    #
+    # Only do this on a FRESH launch, not on reattach: re-running `nemo` to reattach a
+    # live captain should stay fast, and self-updating herdr under an already-running
+    # server would leave it on a deleted binary (the stale-inode / exit-127 trap). A
+    # running captain == reattach; anything else (no server, or a server with no
+    # captain) == fresh start.
+    set -l captain_running 0
+    if herdr agent list 2>/dev/null | string match -q '*"name":"captain"*'
+        set captain_running 1
+    end
+    if test $captain_running -eq 0
+        if test -x "$HOME/.local/bin/update-tools.sh"
+            bash "$HOME/.local/bin/update-tools.sh" nemo
+        else
+            # Updater missing (unusual): do the minimum a fresh fleet needs inline so the
+            # config.toml prefix+f / prefix+shift+f keybindings still have a plugin to invoke.
+            herdr integration install claude >/dev/null 2>&1
+            herdr plugin install smarzban/herdr-file-viewer --yes >/dev/null 2>&1
+        end
+    else
+        # Reattach: keep the live sidebar integration current (cheap, local), then refresh
+        # just the crew tooling that changes often and is safe to update under a running
+        # server: Leo agent skills + firstmate axi. The herdr self-update (would swap the
+        # binary under the live server) and the npm AI globals (heavy; the running captain
+        # would not pick them up) are deliberately left for the next fresh launch.
+        herdr integration install claude >/dev/null 2>&1
+        if test -x "$HOME/.local/bin/update-tools.sh"
+            bash "$HOME/.local/bin/update-tools.sh" nemo-reattach
+        end
+    end
 
     # Ensure the herdr server is up so the captain can be seeded before we attach.
     if not herdr status server 2>/dev/null | string match -q '*status: running*'
