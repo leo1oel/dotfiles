@@ -34,6 +34,16 @@ PAPER_ID_RE = re.compile(
     re.IGNORECASE,
 )
 
+# A Bash command is only a "fetch" when a downloader appears in command
+# position — merely CONTAINING an arxiv.org URL (a BibTeX blob piped to
+# `bibcite add --bibtex`, an echo into a notes file) must not trigger.
+FETCH_CMD_RE = re.compile(
+    r"(?:^|[|;&]|\$\(|`)\s*(?:curl|wget|aria2c|httpie|xh|http)\b"
+)
+
+# Tools that legitimately handle arXiv URLs/ids themselves.
+ALLOWED_TOOL_RE = re.compile(r"\b(bibcite|arxiv2md|bibtex-tidy)\b")
+
 
 def _extract_values(value) -> Iterable[str]:
     """Yield string leaves from nested hook input values."""
@@ -95,9 +105,22 @@ def main() -> None:
             sys.exit(0)
 
         tool_input = input_data.get("tool_input", {})
+
+        if tool_name in {"Bash", "Run"}:
+            command = tool_input.get("command", "")
+            urls = _find_arxiv_urls(command)
+            if (
+                urls
+                and FETCH_CMD_RE.search(command)
+                and not ALLOWED_TOOL_RE.search(command)
+            ):
+                print(_block_message(urls), file=sys.stderr)
+                sys.exit(2)
+            sys.exit(0)
+
+        # WebFetch: any direct arXiv read is redirected to the skill.
         text = "\n".join(_extract_values(tool_input))
         urls = _find_arxiv_urls(text)
-
         if urls:
             print(_block_message(urls), file=sys.stderr)
             sys.exit(2)
