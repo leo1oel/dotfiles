@@ -44,6 +44,12 @@ upd_npm_globals() {
             @anthropic-ai/claude-code@latest \
             @openai/codex@latest \
             || echo "⚠️  Some npm globals failed to upgrade"
+        # bibtex-tidy is needed by the bibcite CLI (its tidy step). Guarded so
+        # machines that already have it (e.g. via brew) keep their copy.
+        if ! command -v bibtex-tidy >/dev/null 2>&1; then
+            echo "📚 Installing bibtex-tidy (needed by bibcite)..."
+            npm install -g bibtex-tidy || echo "⚠️  bibtex-tidy install failed"
+        fi
     else
         echo "ℹ️  npm not found; skipping Claude Code / Codex upgrade"
     fi
@@ -78,6 +84,15 @@ upd_uv() {
         echo "🐍 Upgrading uv and uv tools..."
         uv self update 2>/dev/null || true            # no-op if uv is package-managed
         uv tool upgrade --all || echo "⚠️  Some uv tools failed to upgrade"
+
+        # Ensure bibcite (canonical BibTeX CLI; PyPI package: bibcite-cli) is
+        # installed. The `command -v` guard keeps the dev machine's
+        # `uv tool install --editable ~/CascadeProjects/bibcite` untouched;
+        # PyPI installs get upgraded by the `uv tool upgrade --all` above.
+        if ! command -v bibcite >/dev/null 2>&1; then
+            echo "📚 Installing bibcite (bibcite-cli)..."
+            uv tool install bibcite-cli || echo "⚠️  bibcite install failed"
+        fi
 
         # Ensure a modern python3 (>= 3.8) is the first `python3` on PATH. HPC login
         # nodes often ship an ancient system python3 (e.g. 3.6.8) that breaks hooks
