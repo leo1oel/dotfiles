@@ -10,7 +10,9 @@ Pre-tool use hook for Claude Code to route arXiv paper reads through arxiv2md.
 
 Blocks direct WebFetch and shell commands that include arxiv.org URLs, then tells
 the model to use the arxiv-reading workflow instead. ar5iv.org is intentionally
-allowed as a fallback.
+allowed as a fallback, and figure/image asset URLs (e.g. .../html/<id>/x1.png)
+are allowed so the model can download and view a paper's figures — arxiv2md
+renders those as inert "Refer to caption:" paths and never fetches the bytes.
 
 Managed by chezmoi (dot_claude/hooks/). Invoked from ~/.claude/settings.json.
 """
@@ -43,6 +45,21 @@ FETCH_CMD_RE = re.compile(
 
 # Tools that legitimately handle arXiv URLs/ids themselves.
 ALLOWED_TOOL_RE = re.compile(r"\b(bibcite|arxiv2md|bibtex-tidy)\b")
+
+# Static figure/image assets under an arXiv HTML render
+# (.../html/<id>/x1.png, .../figures/foo.jpg). These are the paper's figures,
+# not a paper read, so downloading and viewing them is allowed. Note: .pdf is
+# deliberately excluded — a raw PDF read stays blocked.
+ASSET_URL_RE = re.compile(
+    r"\.(?:png|jpe?g|gif|svg|webp|bmp|tiff?|ico|avif)(?:[?#]|$)",
+    re.IGNORECASE,
+)
+
+
+def _is_asset_url(url: str) -> bool:
+    """True for image/figure asset URLs the model may fetch directly."""
+
+    return bool(ASSET_URL_RE.search(url))
 
 
 def _extract_values(value) -> Iterable[str]:
@@ -109,20 +126,23 @@ def main() -> None:
         if tool_name in {"Bash", "Run"}:
             command = tool_input.get("command", "")
             urls = _find_arxiv_urls(command)
+            blockable = [url for url in urls if not _is_asset_url(url)]
             if (
-                urls
+                blockable
                 and FETCH_CMD_RE.search(command)
                 and not ALLOWED_TOOL_RE.search(command)
             ):
-                print(_block_message(urls), file=sys.stderr)
+                print(_block_message(blockable), file=sys.stderr)
                 sys.exit(2)
             sys.exit(0)
 
-        # WebFetch: any direct arXiv read is redirected to the skill.
+        # WebFetch: any direct arXiv paper read is redirected to the skill;
+        # figure/image asset URLs are allowed to pass through.
         text = "\n".join(_extract_values(tool_input))
         urls = _find_arxiv_urls(text)
-        if urls:
-            print(_block_message(urls), file=sys.stderr)
+        blockable = [url for url in urls if not _is_asset_url(url)]
+        if blockable:
+            print(_block_message(blockable), file=sys.stderr)
             sys.exit(2)
 
         sys.exit(0)
