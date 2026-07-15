@@ -71,6 +71,12 @@ upd_leo_skills() {
         npm_config_cache="${npm_config_cache:-${TMPDIR:-/tmp}/npm-cache-${USER:-user}}" \
             npx -y skills add leo1oel/leo-agent-skills --global --all \
             || echo "⚠️  Leo agent skills update failed"
+        # bibcite ships in its own repo (next to the bibcite-cli CLI it drives), not in
+        # leo-agent-skills, so install it explicitly rather than via --all above. Same
+        # harmless "does not support global skill installation" line for Eve/PromptScript.
+        npm_config_cache="${npm_config_cache:-${TMPDIR:-/tmp}/npm-cache-${USER:-user}}" \
+            npx -y skills add leo1oel/bibcite --skill bibcite --global --yes \
+            || echo "⚠️  bibcite skill update failed"
     else
         echo "ℹ️  npx not found; skipping Leo agent skills update"
     fi
