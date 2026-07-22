@@ -9,10 +9,11 @@
 Pre-tool use hook for Claude Code to route arXiv paper reads through arxiv2md.
 
 Blocks direct WebFetch and shell commands that include arxiv.org URLs, then tells
-the model to use the arxiv-reading workflow instead. ar5iv.org is intentionally
+the model to use the find-and-read-papers skill workflow instead. ar5iv.org is intentionally
 allowed as a fallback, and figure/image asset URLs (e.g. .../html/<id>/x1.png)
 are allowed so the model can download and view a paper's figures — arxiv2md
 renders those as inert "Refer to caption:" paths and never fetches the bytes.
+alphaXiv hosts (api.alphaxiv.org / www.alphaxiv.org) are not blocked.
 
 Managed by chezmoi (dot_claude/hooks/). Invoked from ~/.claude/settings.json.
 """
@@ -105,9 +106,11 @@ def _block_message(urls: list[str]) -> str:
     command = f"uvx --from arxiv2markdown arxiv2md {id_text} -o paper.md"
     return (
         "Do not directly fetch arxiv.org URLs with WebFetch, curl, wget, or raw "
-        "PDF/HTML reads. Use the arxiv-reading skill: convert the paper with "
-        f"`{command}`, then read the generated markdown. ar5iv.org is allowed "
-        "only as a fallback after arxiv2md cannot convert the paper."
+        "PDF/HTML reads. Use the find-and-read-papers skill: convert the "
+        f"paper with `{command}`, then read the generated markdown. "
+        "Prefer an alphaXiv overview first for triage when that skill is "
+        "loaded. ar5iv.org is allowed only as a fallback after arxiv2md "
+        "cannot convert the paper."
     )
 
 

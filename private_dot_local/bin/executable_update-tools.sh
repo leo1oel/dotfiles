@@ -344,7 +344,7 @@ upd_chezmoi() {
 }
 
 #################
-# OpenAlex API key — used by the `related-work-openalex` skill.
+# OpenAlex API key — used by the `find-and-read-papers` skill (OpenAlex search / citation graph).
 # Free key from https://openalex.org/settings/api. If we have neither an exported
 # key nor the saved key file, prompt once (interactively only) and persist it to a
 # 0600 file that 53_openalex.fish exports into every future shell. Skips silently
