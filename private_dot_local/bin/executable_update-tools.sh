@@ -4,20 +4,26 @@
 # Run directly:        update-tools.sh                # full upgrade (what `up` runs)
 # Run the nemo subset: update-tools.sh nemo           # fleet tooling (fresh `nemo` launch)
 #                      update-tools.sh nemo-reattach  # safe subset (`nemo` reattach)
+#   upstream firstmate: update-tools.sh firstmate     # nemo tooling + treehouse (fresh `firstmate`)
+#                      update-tools.sh firstmate-reattach
 # Or via fish wrapper: `up`  (runs `chezmoi update` first, then this script, full mode)
 #
-# Three modes:
+# Modes:
 #   full  (default) — everything below EXCEPT the firstmate axi/no-mistakes crew
-#                     tooling. That is nemo-specific and owned by the `nemo` launcher
-#                     now, so a box that never runs nemo does not fetch it.
-#   nemo            — everything the nemo fleet needs fresh at a launch with no live
-#                     server: npm AI globals, Leo agent skills, herdr (+ integration/
-#                     plugins), and the axi crew tooling. `nemo` calls this fresh-start.
+#                     tooling. That is fleet-specific and owned by the launcher now,
+#                     so a box that never runs a fleet does not fetch it.
+#   nemo            — everything the nemo (herdr-native fork) fleet needs fresh at a
+#                     launch with no live server: npm AI globals, Leo agent skills,
+#                     herdr (+ integration/plugins), and the axi crew tooling.
 #   nemo-reattach   — the subset that is safe to refresh while a captain is already
 #                     running: Leo agent skills + axi crew tooling. Skips the herdr
 #                     self-update (would swap the binary under the live server) and the
 #                     npm AI globals (heavy; the running captain would not pick them up).
-#                     `nemo` calls this when reattaching a live fleet.
+#   firstmate       — like nemo, PLUS treehouse: upstream firstmate uses herdr for
+#                     sessions but treehouse for worktrees. The `firstmate` launcher
+#                     calls this fresh-start.
+#   firstmate-reattach — same safe subset as nemo-reattach (treehouse needs no
+#                     under-server refresh). The `firstmate` launcher calls this on reattach.
 #
 # Every group is a function so the two modes can share one implementation. Steps are
 # guarded by `command -v`; a failure in one tool never aborts the others.
@@ -325,6 +331,29 @@ upd_axi() {
 }
 
 #################
+# treehouse (git worktree provider for UPSTREAM firstmate). Upstream uses herdr as a
+# session provider only and treehouse for the actual worktrees, so the `firstmate`
+# launcher needs it. The `nemo` herdr-native fork does NOT (herdr owns worktrees
+# there), so this is firstmate-only. Install if missing or if the installed version
+# lacks `treehouse get --lease` support (what firstmate requires); otherwise skip so
+# a normal launch does not re-run the installer over the network every time.
+#################
+upd_treehouse() {
+    command -v curl >/dev/null 2>&1 || return 0
+    local need=0
+    if ! command -v treehouse >/dev/null 2>&1; then
+        need=1
+    elif ! treehouse get --help 2>&1 | grep -Eq '(^|[^[:alnum:]_-])--lease([^[:alnum:]_-]|$)'; then
+        need=1
+    fi
+    if [ "$need" -eq 1 ]; then
+        echo "🌳 Installing/updating treehouse (upstream firstmate worktree provider)..."
+        curl -fsSL https://kunchenguid.github.io/treehouse/install.sh | sh \
+            || echo "⚠️  treehouse install failed"
+    fi
+}
+
+#################
 # Homebrew (macOS) — upgrades everything in the Brewfile and more
 #################
 upd_brew_macos() {
@@ -390,6 +419,26 @@ case "$MODE" in
         upd_axi
         echo "✅ Nemo crew tooling refreshed."
         ;;
+    firstmate)
+        # Fresh launch of UPSTREAM firstmate (kunchenguid/firstmate). Same fleet tooling
+        # as nemo, plus treehouse: upstream uses herdr for sessions but treehouse for
+        # worktrees, so the worktree provider must be present before the fleet runs.
+        echo "🔄 Refreshing upstream firstmate fleet tools (${OS})..."
+        upd_npm_globals
+        upd_leo_skills
+        upd_herdr
+        upd_treehouse
+        upd_axi
+        echo "✅ Upstream firstmate fleet tools ready."
+        ;;
+    firstmate-reattach)
+        # Reattach to a live upstream firstmate. Same safe subset as nemo-reattach;
+        # treehouse is a stable worktree binary that needs no under-server refresh.
+        echo "🔄 Refreshing upstream firstmate crew tooling (reattach)..."
+        upd_leo_skills
+        upd_axi
+        echo "✅ Upstream firstmate crew tooling refreshed."
+        ;;
     full)
         echo "🔄 Upgrading CLI tools (${OS})..."
         upd_npm_globals
@@ -406,7 +455,7 @@ case "$MODE" in
         echo "✅ Tool upgrade complete."
         ;;
     *)
-        echo "update-tools.sh: unknown mode '$MODE' (expected: full | nemo)" >&2
+        echo "update-tools.sh: unknown mode '$MODE' (expected: full | nemo | nemo-reattach | firstmate | firstmate-reattach)" >&2
         exit 2
         ;;
 esac
