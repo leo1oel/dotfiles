@@ -334,23 +334,32 @@ upd_axi() {
 # treehouse (git worktree provider for UPSTREAM firstmate). Upstream uses herdr as a
 # session provider only and treehouse for the actual worktrees, so the `firstmate`
 # launcher needs it. The `nemo` herdr-native fork does NOT (herdr owns worktrees
-# there), so this is firstmate-only. Install if missing or if the installed version
-# lacks `treehouse get --lease` support (what firstmate requires); otherwise skip so
-# a normal launch does not re-run the installer over the network every time.
+# there), so this is firstmate-only. Re-run the installer on every fresh `firstmate`
+# launch to stay current with upstream (same policy as herdr); it is only wired into
+# the fresh mode, never firstmate-reattach, so it never swaps the binary under a live
+# task. Non-fatal so an offline launch still proceeds.
 #################
 upd_treehouse() {
     command -v curl >/dev/null 2>&1 || return 0
-    local need=0
-    if ! command -v treehouse >/dev/null 2>&1; then
-        need=1
-    elif ! treehouse get --help 2>&1 | grep -Eq '(^|[^[:alnum:]_-])--lease([^[:alnum:]_-]|$)'; then
-        need=1
-    fi
-    if [ "$need" -eq 1 ]; then
-        echo "🌳 Installing/updating treehouse (upstream firstmate worktree provider)..."
-        curl -fsSL https://kunchenguid.github.io/treehouse/install.sh | sh \
-            || echo "⚠️  treehouse install failed"
-    fi
+    echo "🌳 Installing/updating treehouse (upstream firstmate worktree provider)..."
+    curl -fsSL https://kunchenguid.github.io/treehouse/install.sh | sh \
+        || echo "⚠️  treehouse install/update failed"
+}
+
+#################
+# quota-axi (upstream firstmate quota-aware dispatch). Upstream lists it as a required
+# bootstrap tool and its dispatch selector calls `quota-axi --json` for the
+# `select: "quota-balanced"` strategy (degrading to random selection if it is absent).
+# firstmate-only: the `nemo` fork is Claude-only single-vendor, where quota-balancing
+# has nothing to balance, so nemo deliberately does not install it. npm global, same
+# class as the other axi tools; refreshed on both fresh and reattach launches.
+#################
+upd_quota_axi() {
+    command -v npm >/dev/null 2>&1 || return 0
+    echo "⚓ Updating quota-axi (upstream firstmate quota-aware dispatch)..."
+    npm install -g quota-axi@latest >/dev/null 2>&1 || { echo "⚠️  quota-axi install/update failed"; return 0; }
+    # Run its one-time hook setup if this axi tool provides it; harmless no-op otherwise.
+    quota-axi setup hooks >/dev/null 2>&1 || true
 }
 
 #################
@@ -421,22 +430,26 @@ case "$MODE" in
         ;;
     firstmate)
         # Fresh launch of UPSTREAM firstmate (kunchenguid/firstmate). Same fleet tooling
-        # as nemo, plus treehouse: upstream uses herdr for sessions but treehouse for
-        # worktrees, so the worktree provider must be present before the fleet runs.
+        # as nemo, plus treehouse (worktree provider) and quota-axi (quota-aware dispatch):
+        # upstream uses herdr for sessions but treehouse for worktrees, and lists quota-axi
+        # as a required bootstrap tool. Both are firstmate-only.
         echo "🔄 Refreshing upstream firstmate fleet tools (${OS})..."
         upd_npm_globals
         upd_leo_skills
         upd_herdr
         upd_treehouse
         upd_axi
+        upd_quota_axi
         echo "✅ Upstream firstmate fleet tools ready."
         ;;
     firstmate-reattach)
-        # Reattach to a live upstream firstmate. Same safe subset as nemo-reattach;
-        # treehouse is a stable worktree binary that needs no under-server refresh.
+        # Reattach to a live upstream firstmate. Same safe subset as nemo-reattach plus
+        # quota-axi (an npm tool safe to refresh under a live server); treehouse is a
+        # fresh-launch-only concern, skipped here to never swap the worktree binary.
         echo "🔄 Refreshing upstream firstmate crew tooling (reattach)..."
         upd_leo_skills
         upd_axi
+        upd_quota_axi
         echo "✅ Upstream firstmate crew tooling refreshed."
         ;;
     full)
